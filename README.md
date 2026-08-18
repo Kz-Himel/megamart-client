@@ -1,7 +1,10 @@
 # Product Marketplace — Client
 
-A modern, responsive storefront and admin dashboard for the Product Marketplace, built with **Next.js**, **TypeScript**, and **HeroUI**. It consumes the [Product Marketplace Server](../product-marketplace-server) API for authentication, catalog browsing, reviews, and order management.
+A modern, responsive storefront and admin dashboard for the Product Marketplace, built with **Next.js**, **TypeScript**, and **HeroUI**. It consumes the [Product Marketplace Server]( https://product-marketplace-server.onrender.com) API for authentication, catalog browsing, reviews, and order management.  
+  
+Live Site Link: https://product-marketplace-client.vercel.app/  
 
+  
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
