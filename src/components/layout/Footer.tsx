@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex items-center gap-2">
           <FiShoppingBag className="text-accent" />
           <span className="font-display font-medium text-foreground">
-            Marketplace
+            Ankara
           </span>
         </div>
         <div className="flex gap-6">

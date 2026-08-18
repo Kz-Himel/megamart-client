@@ -36,7 +36,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           <FiShoppingBag className="text-xl text-accent" />
           <span className="font-display text-lg font-semibold tracking-tight">
-            Marketplace
+            Ankara
           </span>
         </Link>
 
