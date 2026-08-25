@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,6 +24,14 @@ export function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navLinks = [
     ...PUBLIC_LINKS,
@@ -31,32 +39,54 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-background/90 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 bg-background/90 backdrop-blur transition-shadow duration-300 ${
+        isScrolled ? "shadow-[0_1px_0_0_var(--border)]" : ""
+      }`}
+    >
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <Link href="/" className="flex items-center gap-2">
-          <FiShoppingBag className="text-xl text-accent" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10 text-accent">
+            <FiShoppingBag />
+          </span>
           <span className="font-display text-lg font-semibold tracking-tight">
             Ankara
           </span>
         </Link>
 
-        <div className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-accent ${
-                pathname?.startsWith(link.href) ? "text-accent" : "text-foreground/80"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="hidden items-center gap-1 md:flex">
+          {navLinks.map((link) => {
+            const active = pathname?.startsWith(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="relative px-3 py-2 text-sm font-medium transition-colors"
+              >
+                <span
+                  className={
+                    active
+                      ? "relative z-10 text-accent"
+                      : "relative z-10 text-foreground/80 hover:text-accent"
+                  }
+                >
+                  {link.label}
+                </span>
+                {active && (
+                  <motion.span
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 rounded-full bg-accent/10"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+              </Link>
+            );
+          })}
 
           {isAdmin && (
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 text-sm font-medium text-foreground/80 hover:text-accent"
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-accent"
             >
               <FiGrid /> Dashboard
             </Link>
@@ -114,7 +144,11 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-sm font-medium text-foreground/80 hover:text-accent"
+                  className={`text-sm font-medium ${
+                    pathname?.startsWith(link.href)
+                      ? "text-accent"
+                      : "text-foreground/80 hover:text-accent"
+                  }`}
                 >
                   {link.label}
                 </Link>

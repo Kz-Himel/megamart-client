@@ -53,3 +53,78 @@
   height: 2px;
   opacity: 0.6;
 }
+
+/* ---------------------------------------------------------------- */
+/* signature motif: "stitch line" — a running-stitch divider that   */
+/* nods to Ankara wax-print fabric. Used between marketing sections */
+/* instead of a plain border, and echoed in a few small details.    */
+/* ---------------------------------------------------------------- */
+.stitch-divider {
+  position: relative;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--border) 0,
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+.stitch-divider::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--accent), var(--price));
+}
+
+/* seam-stitch used along one edge of a card to read as a fabric swatch */
+.stitch-edge {
+  position: relative;
+}
+.stitch-edge::after {
+  content: "";
+  position: absolute;
+  inset-inline: 14px;
+  bottom: 10px;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--accent-foreground) 55%, transparent) 0,
+    color-mix(in oklab, var(--accent-foreground) 55%, transparent) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  opacity: 0.5;
+}
+
+/* horizontal auto-scrolling strip (category marquee in the hero) */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee-scroll 28s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* hide scrollbar on the swipeable product rail, keep it scrollable */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
