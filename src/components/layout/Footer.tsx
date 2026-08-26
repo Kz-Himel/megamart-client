@@ -26,44 +26,46 @@ const SOCIALS = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border">
-      <div className="mx-auto max-w-6xl px-4 py-12">
+    <footer className="mt-20 border-t border-slate-100 bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10 text-accent">
-                <FiShoppingBag />
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-200">
+                <FiShoppingBag className="text-lg" />
               </span>
-              <span className="font-display text-lg font-semibold tracking-tight">
+              <span className="text-lg font-bold tracking-tight text-slate-900">
                 Ankara
               </span>
             </Link>
-            <p className="mt-3 max-w-[22ch] text-sm text-muted">
+            <p className="mt-3 max-w-[24ch] text-xs leading-relaxed text-slate-500">
               A marketplace woven around real stock, real reviews, real
               sellers.
             </p>
-            <div className="mt-5 flex items-center gap-3">
+            <div className="mt-4 flex items-center gap-2.5">
               {SOCIALS.map(({ href, label, Icon }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-accent"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/80 bg-slate-50/50 text-slate-600 transition-all hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
                 >
-                  <Icon />
+                  <Icon className="text-xs" />
                 </a>
               ))}
             </div>
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold">Shop</h3>
-            <ul className="mt-4 flex flex-col gap-3">
+            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+              Shop
+            </h3>
+            <ul className="mt-4 flex flex-col gap-2.5">
               {SHOP_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted hover:text-accent"
+                    className="text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -73,13 +75,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold">Account</h3>
-            <ul className="mt-4 flex flex-col gap-3">
+            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+              Account
+            </h3>
+            <ul className="mt-4 flex flex-col gap-2.5">
               {ACCOUNT_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted hover:text-accent"
+                    className="text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -89,19 +93,21 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-display text-sm font-semibold">Support</h3>
-            <ul className="mt-4 flex flex-col gap-3 text-sm text-muted">
+            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+              Support
+            </h3>
+            <ul className="mt-4 flex flex-col gap-2.5 text-xs font-semibold text-slate-600">
               <li>Built by Himel</li>
               <li>Next.js · Express · Prisma</li>
             </ul>
           </div>
         </div>
 
-        <div className="stitch-divider mt-10" />
+        <div className="mt-10 border-t border-slate-100" />
 
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 text-xs text-muted sm:flex-row">
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 text-xs text-slate-500 sm:flex-row">
           <p>&copy; {new Date().getFullYear()} Ankara Marketplace. All rights reserved.</p>
-          <p className="font-mono">Built by Himel</p>
+          <p className="font-semibold text-indigo-600">Built by Himel</p>
         </div>
       </div>
     </footer>

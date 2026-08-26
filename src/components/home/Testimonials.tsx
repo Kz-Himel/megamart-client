@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { FiMessageSquare } from "react-icons/fi";
+import { FaQuoteLeft, FaStar } from "react-icons/fa6";
 import { useReviews } from "@/hooks/useReviews";
-import { StarRating } from "../ui/StarRating";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export function Testimonials() {
@@ -15,7 +15,7 @@ export function Testimonials() {
 
   if (isLoading) {
     return (
-      <section className="py-8">
+      <section className="w-full">
         <LoadingSpinner label="Loading reviews..." />
       </section>
     );
@@ -24,34 +24,69 @@ export function Testimonials() {
   if (featured.length === 0) return null;
 
   return (
-    <section className="py-8">
-      <div className="stitch-divider mb-8" />
-
+    <section className="w-full">
       <div className="mb-6">
-        <h2 className="font-display text-2xl font-semibold">What buyers are saying</h2>
-        <p className="mt-1 text-sm text-muted">Pulled straight from verified product reviews.</p>
+        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-indigo-600">
+          Social Proof
+        </span>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          What buyers are saying
+        </h2>
+        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+          Pulled straight from verified product reviews.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {featured.map((review, index) => (
           <motion.figure
             key={review.id}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.3, delay: index * 0.08 }}
-            className="stitch-edge flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5"
+            transition={{ duration: 0.35, delay: index * 0.08 }}
+            whileHover={{ y: -5 }}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-white via-slate-50/50 to-indigo-50/20 p-6 shadow-sm transition-all duration-300 hover:border-indigo-300/80 hover:shadow-xl hover:shadow-indigo-500/5"
           >
-            <FiMessageSquare className="text-lg text-accent/60" />
-            <StarRating rating={review.rating} />
-            <blockquote className="line-clamp-4 flex-1 text-sm text-foreground/90">
-              &ldquo;{review.comment}&rdquo;
-            </blockquote>
-            <figcaption className="pt-8 text-xs text-muted">
-              <span className="font-medium text-foreground">
+            {/* Background Decorative Quote Mark */}
+            <FaQuoteLeft className="pointer-events-none absolute -right-2 -top-2 text-6xl text-slate-100 transition-colors duration-300 group-hover:text-indigo-100/60" />
+
+            <div className="relative space-y-3.5">
+              {/* Header: Icon & Golden Stars */}
+              <div className="flex items-center justify-between">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+                  <FiMessageSquare className="text-base" />
+                </div>
+                
+                {/* Golden Star Rating */}
+                <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 backdrop-blur-sm">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      className={`text-xs ${
+                        i < review.rating ? "text-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.4)]" : "text-slate-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Comment */}
+              <blockquote className="line-clamp-4 text-xs font-medium leading-relaxed text-slate-700 sm:text-sm">
+                &ldquo;{review.comment}&rdquo;
+              </blockquote>
+            </div>
+
+            {/* User Info & Product Name */}
+            <figcaption className="relative mt-6 border-t border-slate-100 pt-3.5 text-[11px] text-slate-400">
+              <span className="font-bold text-slate-800 transition-colors group-hover:text-indigo-600">
                 {review.user?.name ?? "Verified buyer"}
               </span>
-              {review.product?.name && <> &middot; {review.product.name}</>}
+              {review.product?.name && (
+                <span className="block truncate text-[10px] text-slate-400">
+                  {review.product.name}
+                </span>
+              )}
             </figcaption>
           </motion.figure>
         ))}

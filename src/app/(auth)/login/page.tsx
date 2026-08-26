@@ -6,12 +6,10 @@ import Link from "next/link";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
 import { FiLogIn, FiAlertCircle, FiZap } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
-import { AuthShell } from "@/components/auth/AuthShell";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
 
-// Update these once a seeded demo/test account exists on the backend.
 const DEMO_EMAIL = "demo@ankara.com";
 const DEMO_PASSWORD = "demo1234";
 
@@ -61,55 +59,65 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthShell
-      title="Welcome back"
-      subtitle="Log in to continue to the marketplace"
-      footer={
-        <>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-accent hover:underline">
-            Register
-          </Link>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        <GoogleButton />
-        <AuthDivider label="or continue with email" />
+    <div className="flex h-[80vh] w-full items-center justify-center overflow-hidden">
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        {/* Header */}
+        <div className="mb-4 text-center">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
+          <p className="mt-0.5 text-xs text-slate-500">Log in to continue to the marketplace</p>
+        </div>
 
-        <Form onSubmit={handleSubmit} className="w-full space-y-4">
-          <TextField name="email" type="email" isRequired fullWidth>
-            <Label className="text-sm font-medium">Email</Label>
-            <Input placeholder="you@example.com" fullWidth/>
-            <FieldError className="text-xs text-danger" />
-          </TextField>
+        {/* Content Body */}
+        <div className="space-y-3">
+          <GoogleButton />
+          <AuthDivider label="or continue with email" />
 
-          <PasswordField name="password" label="Password" placeholder="••••••••" isRequired minLength={1} />
+          <Form onSubmit={handleSubmit} className="w-full space-y-2.5">
+            <TextField name="email" type="email" isRequired fullWidth>
+              <Label className="text-xs font-semibold text-slate-700">Email</Label>
+              <Input placeholder="you@example.com" fullWidth />
+              <FieldError className="text-[10px] text-red-500" />
+            </TextField>
 
-          {error && (
-            <p className="flex items-start gap-2 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-              <FiAlertCircle className="mt-0.5 flex-shrink-0" />
-              {error}
-            </p>
-          )}
+            <PasswordField name="password" label="Password" placeholder="••••••••" isRequired minLength={1} />
 
-          <Button type="submit" className="w-full" isDisabled={isSubmitting}>
-            <FiLogIn className="mr-1" />
-            {isSubmitting ? "Logging in..." : "Log in"}
+            {error && (
+              <p className="flex items-start gap-1 rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-600">
+                <FiAlertCircle className="mt-0.5 shrink-0 text-sm" />
+                {error}
+              </p>
+            )}
+
+            <Button 
+              type="submit" 
+              className="mt-1 h-9 w-full rounded-full bg-indigo-600 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 active:scale-95" 
+              isDisabled={isSubmitting}
+            >
+              <FiLogIn className="mr-1 text-sm" />
+              {isSubmitting ? "Logging in..." : "Log in"}
+            </Button>
+          </Form>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-8 w-full rounded-full border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            onPress={handleDemoLogin}
+            isDisabled={isDemoLoading}
+          >
+            <FiZap className="mr-1 text-amber-500" />
+            {isDemoLoading ? "Signing in..." : "Try demo login"}
           </Button>
-        </Form>
 
-        <Button
-          type="button"
-          variant="ghost"
-          className="w-full border border-dashed border-border"
-          onPress={handleDemoLogin}
-          isDisabled={isDemoLoading}
-        >
-          <FiZap className="mr-1" />
-          {isDemoLoading ? "Signing in..." : "Try demo login"}
-        </Button>
+          {/* Footer */}
+          <p className="pt-1 text-center text-xs text-slate-500">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-semibold text-indigo-600 hover:underline">
+              Register
+            </Link>
+          </p>
+        </div>
       </div>
-    </AuthShell>
+    </div>
   );
 }

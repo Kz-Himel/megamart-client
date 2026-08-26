@@ -1,81 +1,157 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { FiArrowRight, FiImage } from "react-icons/fi";
+import { 
+  FiArrowRight, 
+  FiFolder, 
+  FiTv, 
+  FiShoppingBag, 
+  FiHome, 
+  FiBookOpen, 
+  FiSmile, 
+  FiCpu, 
+  FiWatch, 
+  FiGift 
+} from "react-icons/fi";
 import { useCategories } from "@/hooks/useCategories";
 import { useProducts } from "@/hooks/useProducts";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
+// Category interfaces
+interface Category {
+  id: string;
+  name: string;
+  status: string;
+  image?: string;
+}
+
+interface Product {
+  id: string;
+  categoryId: string;
+  status: string;
+  images?: string[];
+}
+
+const getCategoryIcon = (categoryName: string) => {
+  const name = categoryName.toLowerCase();
+  const iconClasses = "text-xl text-indigo-600 transition-colors group-hover:text-white";
+
+  if (name.includes("electronic") || name.includes("device") || name.includes("gadget")) return <FiTv className={iconClasses} aria-hidden="true" />;
+  if (name.includes("fashion") || name.includes("cloth") || name.includes("wear")) return <FiShoppingBag className={iconClasses} aria-hidden="true" />;
+  if (name.includes("home") || name.includes("living") || name.includes("furniture")) return <FiHome className={iconClasses} aria-hidden="true" />;
+  if (name.includes("book") || name.includes("study") || name.includes("education")) return <FiBookOpen className={iconClasses} aria-hidden="true" />;
+  if (name.includes("beauty") || name.includes("health") || name.includes("care")) return <FiSmile className={iconClasses} aria-hidden="true" />;
+  if (name.includes("tech") || name.includes("computer") || name.includes("mobile")) return <FiCpu className={iconClasses} aria-hidden="true" />;
+  if (name.includes("watch") || name.includes("accessory") || name.includes("jewel")) return <FiWatch className={iconClasses} aria-hidden="true" />;
+  if (name.includes("toy") || name.includes("gift")) return <FiGift className={iconClasses} aria-hidden="true" />;
+  return <FiFolder className={iconClasses} aria-hidden="true" />;
+};
+
 export function CategoriesSection() {
-  const { data: categories, isLoading } = useCategories();
-  const { data: products } = useProducts();
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories();
+  const { data: products, isLoading: isProductsLoading } = useProducts();
 
-  const featured = categories?.filter((c) => c.status === "ACTIVE").slice(0, 4) ?? [];
+  const isLoading = isCategoriesLoading || isProductsLoading;
 
-  const productsIn = (categoryId: string) =>
-    products?.filter((p) => p.categoryId === categoryId && p.status !== "INACTIVE") ?? [];
+  // Optimize category list
+  const featured = useMemo(() => {
+    return categories?.filter((c: Category) => c.status === "ACTIVE").slice(0, 4) ?? [];
+  }, [categories]);
+
+  // Group active products by categoryId for O(1) lookups
+  const categoryProductsMap = useMemo(() => {
+    const map = new Map<string, Product[]>();
+    if (!products) return map;
+
+    for (const product of products) {
+      if (product.status !== "INACTIVE") {
+        const existing = map.get(product.categoryId) || [];
+        existing.push(product);
+        map.set(product.categoryId, existing);
+      }
+    }
+    return map;
+  }, [products]);
 
   return (
-    <section className="py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-slate-900">Popular Categories</h2>
-        <Link
-          href="/categories"
-          className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-        >
-          View all <FiArrowRight className="text-xs" />
-        </Link>
+    <section className="w-full py-4">
+      <div className="mb-6">
+        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-indigo-600">
+          Explore
+        </span>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Popular Categories
+          </h2>
+          <Link
+            href="/categories"
+            className="group flex items-center gap-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md px-1 py-0.5"
+          >
+            <span>View all</span>
+            <FiArrowRight className="text-xs transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
       {isLoading && <LoadingSpinner label="Loading categories..." />}
 
       {!isLoading && featured.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-slate-200 py-8 text-center text-xs text-slate-500">
-          No categories yet — check back soon.
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center text-xs text-slate-400">
+          No categories available right now.
         </div>
       )}
 
-      {featured.length > 0 && (
-        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-          {featured.map((category, index) => {
-            const inCategory = productsIn(category.id);
-            const thumb = inCategory.find((p) => !!p.image)?.image;
-            
+      {!isLoading && featured.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {featured.map((category: Category, index: number) => {
+            const categoryProducts = categoryProductsMap.get(category.id) ?? [];
+            const count = categoryProducts.length;
+            const thumb = category.image || categoryProducts.find((p) => Boolean(p.images?.[0]))?.images?.[0];
+
             return (
               <motion.div
                 key={category.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.25, delay: index * 0.05 }}
+                transition={{ duration: 0.3, delay: index * 0.06 }}
+                whileHover={{ y: -4 }}
               >
                 <Link
                   href={`/products?categoryId=${category.id}`}
-                  className="group flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-white transition-all duration-200 hover:border-slate-200 hover:shadow-sm"
+                  className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50/40 to-indigo-50/20 p-4 shadow-sm transition-all duration-300 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
-                  {/* Category Image/Icon Container */}
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100/80 group-hover:bg-indigo-50/50 transition-colors">
+                  {/* Background Glow */}
+                  <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-indigo-500/5 transition-transform duration-500 group-hover:scale-150 group-hover:bg-indigo-500/10" />
+
+                  {/* Icon/Image Wrapper */}
+                  <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-indigo-50/80 ring-1 ring-indigo-500/10 transition-all duration-300 group-hover:bg-indigo-600 group-hover:ring-indigo-600 group-hover:shadow-md group-hover:shadow-indigo-600/30">
                     {thumb ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={thumb}
                         alt={category.name}
-                        className="h-7 w-7 object-contain transition-transform duration-300 group-hover:scale-110"
+                        width={32}
+                        height={32}
+                        className="h-8 w-8 object-contain transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (
-                      <FiImage className="text-lg text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                      getCategoryIcon(category.name)
                     )}
                   </div>
 
-                  {/* Text Container */}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                  {/* Text Details */}
+                  <div className="relative min-w-0 flex-1">
+                    <p className="truncate text-xs font-bold text-slate-800 transition-colors duration-200 group-hover:text-indigo-600 sm:text-sm">
                       {category.name}
                     </p>
-                    <p className="text-[11px] text-slate-400 font-medium">
-                      {inCategory.length}+ products
-                    </p>
+                    <div className="mt-1 flex items-center gap-1.5">
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 transition-colors group-hover:bg-indigo-100/80 group-hover:text-indigo-700">
+                        {count} {count === 1 ? "item" : "items"}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
