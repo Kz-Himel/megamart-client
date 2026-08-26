@@ -24,9 +24,9 @@ export function FeaturedProducts() {
 
   return (
     <section className="py-8">
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl font-semibold">Featured products</h2>
+          <h2 className="font-display text-xl font-semibold">Featured products</h2>
           <p className="mt-1 text-sm text-muted">Fresh stock, picked from the current catalog.</p>
         </div>
         <div className="flex items-center gap-2">
