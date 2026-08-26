@@ -21,14 +21,23 @@
 
 :root,
 [data-theme="light"] {
-  --price: oklch(0.78 0.15 85);
-  --price-foreground: oklch(0.22 0.04 85);
+  /* Ankara indigo — retuned to match the ShopHub-style reference (brighter, bluer violet) */
+  --accent: oklch(0.5 0.24 277);
+  --accent-foreground: oklch(0.98 0.01 277);
+  --background: oklch(0.985 0.004 300);
+  --surface: oklch(1 0 0);
+  --border: oklch(0.9 0.01 300);
 }
+
 .dark,
 [data-theme="dark"] {
-  --price: oklch(0.8 0.13 85);
-  --price-foreground: oklch(0.2 0.04 85);
+  --accent: oklch(0.72 0.17 277);
+  --accent-foreground: oklch(0.18 0.03 277);
+  --background: oklch(0.16 0.015 300);
+  --surface: oklch(0.2 0.015 300);
+  --border: oklch(0.28 0.015 300);
 }
+
 @theme inline {
   --color-price: var(--price);
   --color-price-foreground: var(--price-foreground);
@@ -127,4 +136,16 @@
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+.hero-glow {
+  background: radial-gradient(
+    60% 60% at 70% 30%,
+    color-mix(in oklab, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+.dot-grid {
+  background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
 }

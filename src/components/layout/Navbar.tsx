@@ -2,29 +2,42 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@heroui/react";
 import {
   FiShoppingBag,
   FiMenu,
   FiX,
-  FiUser,
-  FiLogOut,
+  FiSearch,
+  FiPackage,
   FiGrid,
+  FiLogOut,
 } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
 
-const PUBLIC_LINKS = [
+const NAV_LINKS = [
   { href: "/products", label: "Products" },
   { href: "/categories", label: "Categories" },
 ];
 
+function initials(name?: string) {
+  if (!name) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
 export function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
@@ -33,10 +46,12 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navLinks = [
-    ...PUBLIC_LINKS,
-    ...(isAuthenticated ? [{ href: "/orders", label: "My Orders" }] : []),
-  ];
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    // Visual for now — takes you to the products page, where search isn't
+    // wired to this input yet. Full query filtering comes in a later pass.
+    e.preventDefault();
+    router.push("/products");
+  };
 
   return (
     <header
@@ -44,9 +59,9 @@ export function Navbar() {
         isScrolled ? "shadow-[0_1px_0_0_var(--border)]" : ""
       }`}
     >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10 text-accent">
+      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4">
+        <Link href="/" className="flex flex-shrink-0 items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-accent-foreground">
             <FiShoppingBag />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">
@@ -54,8 +69,23 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => {
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden flex-1 items-center md:flex"
+        >
+          <div className="flex w-full max-w-md items-center gap-2 rounded-full border border-border bg-surface-secondary px-4 py-2 focus-within:border-accent">
+            <FiSearch className="text-muted" />
+            <input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search products..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+            />
+          </div>
+        </form>
+
+        <div className="hidden flex-shrink-0 items-center gap-1 md:flex">
+          {NAV_LINKS.map((link) => {
             const active = pathname?.startsWith(link.href);
             return (
               <Link
@@ -93,17 +123,23 @@ export function Navbar() {
           )}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden flex-shrink-0 items-center gap-4 md:flex">
           {isAuthenticated ? (
             <>
               <Link
-                href="/profile"
-                className="flex items-center gap-1 text-sm font-medium text-foreground/80 hover:text-accent"
+                href="/orders"
+                aria-label="My orders"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-accent hover:text-accent"
               >
-                <FiUser /> {user?.name.split(" ")[0]}
+                <FiPackage />
+              </Link>
+              <Link href="/profile" aria-label="Profile">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
+                  {initials(user?.name)}
+                </span>
               </Link>
               <Button size="sm" variant="ghost" onPress={logout}>
-                <FiLogOut className="mr-1" /> Logout
+                <FiLogOut />
               </Button>
             </>
           ) : (
@@ -119,7 +155,7 @@ export function Navbar() {
         </div>
 
         <button
-          className="md:hidden"
+          className="ml-auto md:hidden"
           onClick={() => setIsMenuOpen((prev) => !prev)}
           aria-label="Toggle menu"
         >
@@ -139,7 +175,19 @@ export function Navbar() {
             className="overflow-hidden border-b border-border bg-background md:hidden"
           >
             <div className="flex flex-col gap-4 px-4 py-4">
-              {navLinks.map((link) => (
+              <form onSubmit={handleSearchSubmit} className="flex items-center">
+                <div className="flex w-full items-center gap-2 rounded-full border border-border bg-surface-secondary px-4 py-2 focus-within:border-accent">
+                  <FiSearch className="text-muted" />
+                  <input
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder="Search products..."
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                  />
+                </div>
+              </form>
+
+              {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -164,6 +212,13 @@ export function Navbar() {
               )}
               {isAuthenticated ? (
                 <>
+                  <Link
+                    href="/orders"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-sm font-medium text-foreground/80 hover:text-accent"
+                  >
+                    My orders
+                  </Link>
                   <Link
                     href="/profile"
                     onClick={() => setIsMenuOpen(false)}
