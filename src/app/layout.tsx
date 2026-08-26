@@ -6,7 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "Marketplace",
+  title: "Ankara | Product Marketplace",
   description: "A product marketplace built with Next.js, Express & Prisma",
 };
 
