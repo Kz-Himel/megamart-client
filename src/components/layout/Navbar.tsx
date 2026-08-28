@@ -248,7 +248,7 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
                 className="flex items-center gap-2 text-xs font-semibold text-slate-700 py-1.5"
               >
-                <FiShoppingCart aria-hidden="true" /> Cart (2)
+                <FiShoppingCart aria-hidden="true" /> Cart
               </Link>
 
               <div className="pt-2 border-t border-slate-100 mt-1">
