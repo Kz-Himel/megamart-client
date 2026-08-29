@@ -9,8 +9,12 @@ export const orderKeys = {
   detail: (id: string) => ["orders", id] as const,
 };
 
-export function useOrders() {
-  return useQuery({ queryKey: orderKeys.all, queryFn: orderApi.getAll });
+export function useOrders(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: orderKeys.all,
+    queryFn: orderApi.getAll,
+    enabled: options?.enabled ?? true,
+  });
 }
 
 export function useOrder(id: string) {
