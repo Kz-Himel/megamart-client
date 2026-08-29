@@ -27,6 +27,10 @@
   --background: oklch(0.985 0.004 300);
   --surface: oklch(1 0 0);
   --border: oklch(0.9 0.01 300);
+  /* dedicated gold/marigold token for prices, ratings, and stars — kept
+     separate from --accent so pricing always reads distinctly from links/CTAs */
+  --price: oklch(0.75 0.16 75);
+  --price-foreground: oklch(0.32 0.07 65);
 }
 
 .dark,
@@ -36,6 +40,8 @@
   --background: oklch(0.16 0.015 300);
   --surface: oklch(0.2 0.015 300);
   --border: oklch(0.28 0.015 300);
+  --price: oklch(0.8 0.14 75);
+  --price-foreground: oklch(0.22 0.05 65);
 }
 
 @theme inline {
