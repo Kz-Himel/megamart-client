@@ -8,13 +8,16 @@ import { CtaSection } from "@/components/home/CtaSection";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6">
+    // RootLayout already renders the page inside a <main> landmark, so this
+    // is a plain wrapper — keeps the homepage's own width/spacing without
+    // creating a second (invalid) nested <main>.
+    <div className="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6">
       <HeroSection />
       <CategoriesSection />
       <FeaturedProducts />
       <Testimonials />
       {/* <ReviewsSection /> */}
       <CtaSection />
-    </main>
+    </div>
   );
 }
