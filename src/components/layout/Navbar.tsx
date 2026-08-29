@@ -15,6 +15,7 @@ import {
   FiShoppingCart,
 } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useOrders } from "@/hooks/useOrders";
 
 const NAV_LINKS = [
   { href: "/categories", label: "Categories" },
@@ -38,6 +39,10 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+
+  const { data: orders } = useOrders({ enabled: isAuthenticated });
+  const orderCount = isAuthenticated ? orders?.length ?? 0 : 0;
+  const ordersLabel = `My orders${isAuthenticated ? ` (${orderCount})` : ""}`;
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
@@ -68,8 +73,8 @@ export function Navbar() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
         {/* Brand Logo */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="flex flex-shrink-0 items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-0.5"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-200">
@@ -131,21 +136,21 @@ export function Navbar() {
             </Link>
           )}
 
-          {/* Cart Icon */}
+          {/* My Orders */}
           <Link
             href="/orders"
-            aria-label="Shopping Cart containing 2 items"
+            aria-label={ordersLabel}
             className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 py-0.5"
           >
             <FiShoppingCart className="text-base" aria-hidden="true" />
-            <span>Cart (2)</span>
+            <span>{ordersLabel}</span>
           </Link>
 
           {isAuthenticated ? (
             <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-              <Link 
-                href="/profile" 
-                aria-label="User Profile" 
+              <Link
+                href="/profile"
+                aria-label="User Profile"
                 className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-full"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600 ring-2 ring-indigo-600/20 transition-all group-hover:ring-indigo-600/40">
@@ -165,8 +170,8 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="text-xs font-semibold text-slate-700 hover:text-indigo-600 transition-colors px-2 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 Log in
@@ -248,7 +253,7 @@ export function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
                 className="flex items-center gap-2 text-xs font-semibold text-slate-700 py-1.5"
               >
-                <FiShoppingCart aria-hidden="true" /> Cart
+                <FiShoppingCart aria-hidden="true" /> {ordersLabel}
               </Link>
 
               <div className="pt-2 border-t border-slate-100 mt-1">
@@ -264,13 +269,13 @@ export function Navbar() {
                       </span>
                       Profile
                     </Link>
-                    <Button 
-                      size="sm" 
-                      variant="danger-soft" 
+                    <Button
+                      size="sm"
+                      variant="danger-soft"
                       onPress={() => {
                         logout();
                         setIsMenuOpen(false);
-                      }} 
+                      }}
                       className="text-xs"
                     >
                       Logout
