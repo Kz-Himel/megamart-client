@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { FiBox, FiShoppingCart, FiTag, FiHeart, FiStar, FiCheckCircle } from "react-icons/fi";
+import { FiBox, FiShoppingCart, FiTag, FiStar, FiCheckCircle, FiAlertCircle, FiArrowLeft } from "react-icons/fi";
 import { Button } from "@heroui/react";
-import { useProduct } from "@/hooks/useProducts";
+import { useProduct, useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/lib/auth/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { ProductCard } from "@/components/products/ProductCard";
 import { ReviewList } from "@/components/reviews/ReviewList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 
@@ -19,24 +19,69 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: product, isLoading } = useProduct(id);
+  const { data: product, isLoading, isError, refetch } = useProduct(id);
+  const { data: allProducts } = useProducts();
   const { isAuthenticated } = useAuth();
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  if (isLoading) return <LoadingSpinner label="Loading product..." />;
-  if (!product) return null;
+  if (isLoading) {
+    return (
+      <div className="py-16">
+        <LoadingSpinner label="Loading product..." />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-rose-200 bg-rose-50/50 py-20 text-center">
+        <FiAlertCircle className="text-3xl text-rose-400" />
+        <div>
+          <p className="text-sm font-semibold text-rose-700">Couldn&apos;t load this product</p>
+          <p className="mt-1 text-xs text-rose-500">Something went wrong reaching the server.</p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-rose-700"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 py-20 text-center">
+        <FiBox className="text-3xl text-slate-300" />
+        <div>
+          <p className="text-sm font-semibold text-slate-700">Product not found</p>
+          <p className="mt-1 text-xs text-slate-500">It may have been removed or is no longer available.</p>
+        </div>
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
+        >
+          <FiArrowLeft /> Back to products
+        </Link>
+      </div>
+    );
+  }
 
   const canOrder = product.status === "ACTIVE" && product.stock > 0;
-  
-  // Safe extraction for product ratings
-  const reviews = product.reviews ?? [];
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((acc: number, rev: any) => acc + (rev.rating || 5), 0) / reviews.length).toFixed(1)
-    : "4.8";
 
-  const handleWishlistToggle = () => {
-    setIsWishlisted((prev) => !prev);
-  };
+  // Real rating computed from this product's actual reviews — never a
+  // placeholder fallback.
+  const reviews = product.reviews ?? [];
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((acc, rev) => acc + (rev.rating || 0), 0) / reviews.length
+      : null;
+
+  // Related products: same category, drawn from data we already have —
+  // no new endpoint required.
+  const related = (allProducts ?? [])
+    .filter((p) => p.id !== product.id && p.categoryId === product.categoryId && p.status === "ACTIVE")
+    .slice(0, 4);
 
   return (
     <div className="mx-auto max-w-6xl py-4 space-y-12">
@@ -54,16 +99,6 @@ export default function ProductDetailPage() {
           ) : (
             <FiBox className="text-5xl text-slate-300" />
           )}
-
-          {/* Quick Wishlist Floating Button */}
-          <button
-            type="button"
-            onClick={handleWishlistToggle}
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm border border-slate-100 text-slate-500 hover:text-rose-500 transition-colors"
-            aria-label="Add to Wishlist"
-          >
-            <FiHeart className={`text-lg ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
-          </button>
         </div>
 
         {/* Product Details & Purchase Actions */}
@@ -79,15 +114,24 @@ export default function ProductDetailPage() {
 
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
 
-          {/* Gold Star Ratings Summary */}
+          {/* Rating Summary */}
           <div className="mt-2.5 flex items-center gap-2">
-            <div className="flex items-center gap-1 text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <FiStar key={i} className="fill-amber-400 text-amber-400 text-sm" />
-              ))}
-            </div>
-            <span className="text-xs font-semibold text-slate-700">{averageRating}</span>
-            <span className="text-xs text-slate-400">({reviews.length} reviews)</span>
+            {averageRating !== null ? (
+              <>
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar
+                      key={i}
+                      className={i < Math.round(averageRating) ? "fill-amber-400 text-amber-400 text-sm" : "text-slate-200 text-sm"}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-semibold text-slate-700">{averageRating.toFixed(1)}</span>
+                <span className="text-xs text-slate-400">({reviews.length} reviews)</span>
+              </>
+            ) : (
+              <span className="text-xs font-medium text-slate-400">No reviews yet</span>
+            )}
           </div>
 
           <p className="mt-4 leading-relaxed text-slate-600 text-sm">{product.description}</p>
@@ -95,46 +139,48 @@ export default function ProductDetailPage() {
           {/* Price & Stock Section */}
           <div className="mt-6 flex items-baseline gap-3 border-y border-slate-100 py-4">
             <div className="flex items-baseline gap-0.5 font-bold text-slate-900">
-              <span className="text-lg">৳</span>
-              <span className="text-3xl tracking-tight">{product.price.toLocaleString()}</span>
+              <span className="text-lg">$</span>
+              <span className="text-3xl tracking-tight">{product.price.toFixed(2)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <FiCheckCircle className="text-emerald-500" />
-              <span>{product.stock} units available</span>
+              <span>
+                {product.stock > 0 ? `${product.stock} units available` : "Out of stock"}
+              </span>
             </div>
           </div>
 
-          {/* Action Buttons: Order Now & Add to Wishlist */}
-          <div className="mt-6 flex items-center gap-3">
+          {/* Action Button */}
+          <div className="mt-6">
             {canOrder ? (
-              <Link href={`/orders/new?productId=${product.id}`} className="flex-1">
+              <Link href={`/orders/new?productId=${product.id}`}>
                 <Button
                   size="lg"
-                  className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-100"
+                  className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-100 sm:w-auto sm:px-10"
                 >
                   <FiShoppingCart className="mr-1 text-lg" /> Order Now
                 </Button>
               </Link>
             ) : (
-              <Button isDisabled size="lg" className="flex-1 rounded-2xl">
+              <Button isDisabled size="lg" className="w-full rounded-2xl sm:w-auto sm:px-10">
                 {product.status === "OUT_OF_STOCK" ? "Out of Stock" : "Not Available"}
               </Button>
             )}
-
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleWishlistToggle}
-              className={`rounded-2xl border-slate-200 font-medium transition-colors ${
-                isWishlisted ? "border-rose-200 bg-rose-50 text-rose-600" : "hover:bg-slate-50 text-slate-700"
-              }`}
-            >
-              <FiHeart className={`text-lg ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
-              <span className="hidden sm:inline">{isWishlisted ? "Wishlisted" : "Wishlist"}</span>
-            </Button>
           </div>
         </div>
       </div>
+
+      {/* Related Products */}
+      {related.length > 0 && (
+        <div className="border-t border-slate-100 pt-10">
+          <h2 className="mb-5 text-xl font-bold text-slate-900">You might also like</h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Reviews & Ratings Section */}
       <div className="border-t border-slate-100 pt-10">
@@ -144,11 +190,12 @@ export default function ProductDetailPage() {
             <p className="text-xs text-slate-500">Read what others think about this product</p>
           </div>
 
-          {/* Gold Star Badge Header */}
-          <div className="flex items-center gap-1.5 rounded-2xl bg-amber-50 px-3.5 py-1.5 border border-amber-200/60">
-            <FiStar className="fill-amber-400 text-amber-400 text-base" />
-            <span className="text-sm font-bold text-amber-900">{averageRating} out of 5</span>
-          </div>
+          {averageRating !== null && (
+            <div className="flex items-center gap-1.5 rounded-2xl bg-amber-50 px-3.5 py-1.5 border border-amber-200/60">
+              <FiStar className="fill-amber-400 text-amber-400 text-base" />
+              <span className="text-sm font-bold text-amber-900">{averageRating.toFixed(1)} out of 5</span>
+            </div>
+          )}
         </div>
 
         {isAuthenticated && (
@@ -158,10 +205,7 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Reviews List Component Container */}
-        <div className="gold-ratings-theme">
-          <ReviewList productId={product.id} reviews={reviews} />
-        </div>
+        <ReviewList productId={product.id} reviews={reviews} />
       </div>
     </div>
   );
