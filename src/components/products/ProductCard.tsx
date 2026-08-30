@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FiImage, FiStar } from "react-icons/fi";
+import { FiImage, FiStar, FiArrowRight } from "react-icons/fi";
 import { Product } from "../../types/products.types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
@@ -14,18 +14,23 @@ export function ProductCard({ product }: { product: Product }) {
       : null;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-3 transition-all duration-200 hover:border-slate-200 hover:shadow-md">
-      {/* Product Image Box */}
-      <div className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100/70 p-4">
+    <Link
+      href={`/products/${product.id}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-3 transition-all duration-200 hover:border-slate-200 hover:shadow-md"
+    >
+      {/* Product Image Box — image fully covers the box, zooms in on hover/click */}
+      <div className="relative h-44 w-full overflow-hidden rounded-xl bg-slate-100/70">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.image}
             alt={product.name}
-            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
           />
         ) : (
-          <FiImage className="text-3xl text-slate-300" />
+          <div className="flex h-full w-full items-center justify-center">
+            <FiImage className="text-3xl text-slate-300" />
+          </div>
         )}
 
         {/* Status Badge overlay */}
@@ -39,7 +44,7 @@ export function ProductCard({ product }: { product: Product }) {
       {/* Product Information Section */}
       <div className="flex flex-1 flex-col pt-3">
         {/* Product Name */}
-        <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+        <h3 className="truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-indigo-600">
           {product.name}
         </h3>
 
@@ -71,16 +76,12 @@ export function ProductCard({ product }: { product: Product }) {
           <span className="text-base">{product.price.toFixed(2)}</span>
         </div>
 
-        {/* Action Button */}
-        <div className="mt-3 pt-1">
-          <Link
-            href={`/products/${product.id}`}
-            className="flex w-full items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50/40 py-2 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-600 hover:text-white"
-          >
-            View Details
-          </Link>
+        {/* View details indicator — whole card is already the link */}
+        <div className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/40 py-2 text-xs font-semibold text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+          View Details
+          <FiArrowRight className="transition-transform duration-200 group-hover:translate-x-1" />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
