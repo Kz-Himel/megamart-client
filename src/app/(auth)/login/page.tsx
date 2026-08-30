@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
 import { FiLogIn, FiAlertCircle, FiZap } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
@@ -14,7 +15,7 @@ const DEMO_EMAIL = "demo@ankara.com";
 const DEMO_PASSWORD = "demo1234";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +26,13 @@ export default function LoginPage() {
     const redirect = searchParams.get("redirect");
     router.push(redirect || (role === "ADMIN" ? "/dashboard" : "/"));
   };
+
+  // Already signed in — no reason to show the login form.
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated) {
+      router.replace(searchParams.get("redirect") || "/");
+    }
+  }, [isAuthLoading, isAuthenticated, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,7 +68,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-[80vh] w-full items-center justify-center overflow-hidden">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+      {isAuthLoading || isAuthenticated ? (
+        <LoadingSpinner label="Redirecting..." />
+      ) : (
+        <div className="w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
         {/* Header */}
         <div className="mb-4 text-center">
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
@@ -117,7 +128,8 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
