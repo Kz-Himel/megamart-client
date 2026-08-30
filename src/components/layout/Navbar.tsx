@@ -10,7 +10,6 @@ import {
   FiMenu,
   FiX,
   FiSearch,
-  FiGrid,
   FiLogOut,
   FiShoppingCart,
 } from "react-icons/fi";
@@ -43,6 +42,8 @@ export function Navbar() {
   const { data: orders } = useOrders({ enabled: isAuthenticated });
   const orderCount = isAuthenticated ? orders?.length ?? 0 : 0;
   const ordersLabel = `My orders${isAuthenticated ? ` (${orderCount})` : ""}`;
+  const profileHref = isAdmin ? "/dashboard" : "/account/profile";
+  const profileLabel = isAdmin ? "Admin dashboard" : "My profile";
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
@@ -73,8 +74,8 @@ export function Navbar() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
         {/* Brand Logo */}
-        <Link
-          href="/"
+        <Link 
+          href="/" 
           className="flex flex-shrink-0 items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-0.5"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-200">
@@ -127,15 +128,6 @@ export function Navbar() {
             );
           })}
 
-          {isAdmin && (
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 py-0.5"
-            >
-              <FiGrid className="text-sm text-indigo-500" aria-hidden="true" /> Dashboard
-            </Link>
-          )}
-
           {/* My Orders */}
           <Link
             href="/orders"
@@ -148,9 +140,9 @@ export function Navbar() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-              <Link
-                href="/profile"
-                aria-label="User Profile"
+              <Link 
+                href={profileHref} 
+                aria-label={profileLabel} 
                 className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-full"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600 ring-2 ring-indigo-600/20 transition-all group-hover:ring-indigo-600/40">
@@ -170,8 +162,8 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <Link
-                href="/login"
+              <Link 
+                href="/login" 
                 className="text-xs font-semibold text-slate-700 hover:text-indigo-600 transition-colors px-2 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 Log in
@@ -238,16 +230,6 @@ export function Navbar() {
                 </Link>
               ))}
 
-              {isAdmin && (
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-xs font-semibold text-slate-700 py-1.5"
-                >
-                  Dashboard
-                </Link>
-              )}
-
               <Link
                 href="/orders"
                 onClick={() => setIsMenuOpen(false)}
@@ -260,22 +242,22 @@ export function Navbar() {
                 {isAuthenticated ? (
                   <div className="flex items-center justify-between">
                     <Link
-                      href="/profile"
+                      href={profileHref}
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-2 text-xs font-semibold text-slate-700"
                     >
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">
                         {initials(user?.name)}
                       </span>
-                      Profile
+                      {profileLabel}
                     </Link>
-                    <Button
-                      size="sm"
-                      variant="danger-soft"
+                    <Button 
+                      size="sm" 
+                      variant="danger-soft" 
                       onPress={() => {
                         logout();
                         setIsMenuOpen(false);
-                      }}
+                      }} 
                       className="text-xs"
                     >
                       Logout

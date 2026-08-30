@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   FiShoppingBag,
@@ -5,17 +7,12 @@ import {
   FiTwitter,
   FiFacebook,
 } from "react-icons/fi";
+import { useAuth } from "@/lib/auth/useAuth";
 
 const SHOP_LINKS = [
   { href: "/products", label: "All products" },
   { href: "/categories", label: "Categories" },
   { href: "/orders", label: "My orders" },
-];
-
-const ACCOUNT_LINKS = [
-  { href: "/register", label: "Create account" },
-  { href: "/login", label: "Log in" },
-  { href: "/profile", label: "Profile" },
 ];
 
 const SOCIALS = [
@@ -25,6 +22,13 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const { isAdmin } = useAuth();
+  const accountLinks = [
+    { href: "/register", label: "Create account" },
+    { href: "/login", label: "Log in" },
+    { href: isAdmin ? "/dashboard" : "/account/profile", label: isAdmin ? "Admin dashboard" : "Profile" },
+  ];
+
   return (
     <footer className="mt-20 border-t border-slate-100 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -79,7 +83,7 @@ export function Footer() {
               Account
             </h3>
             <ul className="mt-4 flex flex-col gap-2.5">
-              {ACCOUNT_LINKS.map((link) => (
+              {accountLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
