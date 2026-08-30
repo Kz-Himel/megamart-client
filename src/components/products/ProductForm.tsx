@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
+import { FiUploadCloud, FiX, FiImage } from "react-icons/fi";
 import { useCategories } from "@/hooks/useCategories";
 import { Product, ProductPayload, ProductStatus } from "../../types/products.types";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { uploadApi } from "@/lib/api/upload.api";
 
 interface ProductFormProps {
   initialValues?: Product;
@@ -25,8 +27,29 @@ export function ProductForm({
   const [categoryId, setCategoryId] = useState(
     initialValues?.categoryId ?? ""
   );
+  const [imageUrl, setImageUrl] = useState(initialValues?.image ?? "");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (loadingCategories) return <LoadingSpinner label="Loading categories..." />;
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    setIsUploading(true);
+    try {
+      const url = await uploadApi.uploadProductImage(file);
+      setImageUrl(url);
+    } catch (err: any) {
+      setUploadError(err.message || "Image upload failed");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,7 +60,6 @@ export function ProductForm({
     const description = String(formData.get("description") || "");
     const price = Number(formData.get("price") || 0);
     const stock = Number(formData.get("stock") || 0);
-    const image = String(formData.get("image") || "");
 
     const finalCategoryId = categoryId || categories?.[0]?.id || "";
     if (!finalCategoryId) {
@@ -51,7 +73,7 @@ export function ProductForm({
         description,
         price,
         stock,
-        image: image || undefined,
+        image: imageUrl || undefined,
         status,
         categoryId: finalCategoryId,
       });
@@ -87,10 +109,56 @@ export function ProductForm({
         </TextField>
       </div>
 
-      <TextField name="image" defaultValue={initialValues?.image ?? ""}>
-        <Label className="text-sm font-medium">Image URL</Label>
-        <Input placeholder="https://... (optional)" />
-      </TextField>
+      {/* Product image — upload from desktop, sent to the backend upload route */}
+      <div>
+        <label className="mb-1 block text-sm font-medium">Product image</label>
+
+        <div className="flex items-start gap-4">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-background">
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imageUrl} alt="Product preview" className="h-full w-full object-cover" />
+            ) : (
+              <FiImage className="text-2xl text-slate-300" />
+            )}
+          </div>
+
+          <div className="flex-1 space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="product-image-upload"
+            />
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="product-image-upload"
+                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-indigo-500 hover:text-indigo-600"
+              >
+                <FiUploadCloud />
+                {isUploading ? "Uploading..." : imageUrl ? "Replace image" : "Upload image"}
+              </label>
+
+              {imageUrl && !isUploading && (
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  aria-label="Remove image"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-rose-600"
+                >
+                  <FiX />
+                </button>
+              )}
+            </div>
+
+            <p className="text-[11px] text-slate-400">PNG or JPG, up to 5MB.</p>
+
+            {uploadError && <p className="text-xs text-danger">{uploadError}</p>}
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -124,7 +192,7 @@ export function ProductForm({
 
       {error && <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
 
-      <Button type="submit" className="w-full" isDisabled={isSubmitting}>
+      <Button type="submit" className="w-full" isDisabled={isSubmitting || isUploading}>
         {isSubmitting ? "Saving..." : submitLabel}
       </Button>
     </Form>
