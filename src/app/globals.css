@@ -1,52 +1,50 @@
+/* src/app/globals.css */
 @import "tailwindcss";
 @import "@heroui/styles";
 
 :root,
 [data-theme="light"] {
-  --accent: oklch(0.42 0.16 306);
-  --accent-foreground: oklch(0.98 0.005 306);
-  --background: oklch(0.985 0.004 300);
-  --surface: oklch(1 0 0);
-  --border: oklch(0.9 0.01 300);
+  /* MegaMart reference — hex values sampled directly from the design image,
+     not approximated, so the blue/green match exactly. */
+  --accent: #0090ce;
+  --accent-foreground: #ffffff;
+  --background: #ffffff;
+  --surface: #ffffff;
+  --border: #e7eaee;
+  /* star ratings / review highlights (no equivalent in the reference —
+     kept as a clean amber so it doesn't compete with the primary blue) */
+  --price: #f5a623;
+  --price-foreground: #92400e;
+  /* "Save - ₹X" discount text on product cards */
+  --success: #3b8554;
+  --success-foreground: #1f5b37;
+  /* hero banner background */
+  --navy: #212844;
+  --navy-foreground: #ffffff;
 }
 
 .dark,
 [data-theme="dark"] {
-  --accent: oklch(0.72 0.14 306);
-  --accent-foreground: oklch(0.16 0.02 306);
-  --background: oklch(0.16 0.015 300);
-  --surface: oklch(0.2 0.015 300);
-  --border: oklch(0.28 0.015 300);
-}
-
-:root,
-[data-theme="light"] {
-  /* Ankara indigo — retuned to match the ShopHub-style reference (brighter, bluer violet) */
-  --accent: oklch(0.5 0.24 277);
-  --accent-foreground: oklch(0.98 0.01 277);
-  --background: oklch(0.985 0.004 300);
-  --surface: oklch(1 0 0);
-  --border: oklch(0.9 0.01 300);
-  /* dedicated gold/marigold token for prices, ratings, and stars — kept
-     separate from --accent so pricing always reads distinctly from links/CTAs */
-  --price: oklch(0.75 0.16 75);
-  --price-foreground: oklch(0.32 0.07 65);
-}
-
-.dark,
-[data-theme="dark"] {
-  --accent: oklch(0.72 0.17 277);
-  --accent-foreground: oklch(0.18 0.03 277);
-  --background: oklch(0.16 0.015 300);
-  --surface: oklch(0.2 0.015 300);
-  --border: oklch(0.28 0.015 300);
-  --price: oklch(0.8 0.14 75);
-  --price-foreground: oklch(0.22 0.05 65);
+  --accent: #38b6e8;
+  --accent-foreground: #04222e;
+  --background: #12151c;
+  --surface: #1a1e27;
+  --border: #2a2f3a;
+  --price: #fbbf54;
+  --price-foreground: #3a2205;
+  --success: #4ade80;
+  --success-foreground: #0b2a15;
+  --navy: #171b2e;
+  --navy-foreground: #ffffff;
 }
 
 @theme inline {
   --color-price: var(--price);
   --color-price-foreground: var(--price-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
 }
 
 @theme inline {
