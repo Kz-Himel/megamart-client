@@ -71,7 +71,7 @@ export default function LoginPage() {
       {isAuthLoading || isAuthenticated ? (
         <LoadingSpinner label="Redirecting..." />
       ) : (
-        <div className="w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        <div className="w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-sm">
         {/* Header */}
         <div className="mb-4 text-center">
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
@@ -101,7 +101,7 @@ export default function LoginPage() {
 
             <Button 
               type="submit" 
-              className="mt-1 h-9 w-full rounded-full bg-indigo-600 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 active:scale-95" 
+              className="mt-1 h-9 w-full rounded-full bg-accent text-xs font-semibold text-accent-foreground hover:opacity-90 active:scale-95" 
               isDisabled={isSubmitting}
             >
               <FiLogIn className="mr-1 text-sm" />
@@ -123,7 +123,7 @@ export default function LoginPage() {
           {/* Footer */}
           <p className="pt-1 text-center text-xs text-slate-500">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-indigo-600 hover:underline">
+            <Link href="/register" className="font-semibold text-accent hover:underline">
               Register
             </Link>
           </p>

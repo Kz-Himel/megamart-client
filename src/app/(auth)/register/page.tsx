@@ -56,7 +56,7 @@ export default function RegisterPage() {
       {isAuthLoading || isAuthenticated ? (
         <LoadingSpinner label="Redirecting..." />
       ) : (
-      <div className="w-full max-w-sm rounded-3xl border border-slate-200/80 bg-white p-7 shadow-lg shadow-slate-100">
+      <div className="w-full max-w-sm rounded-3xl border border-border bg-white p-7 shadow-lg shadow-slate-100">
         {/* Header */}
         <div className="mb-4 text-center">
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Create an account</h1>
@@ -106,7 +106,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="mt-1 h-10 w-full rounded-full bg-indigo-600 text-xs font-semibold text-white shadow-md hover:bg-indigo-700 active:scale-95"
+              className="mt-1 h-10 w-full rounded-full bg-accent text-xs font-semibold text-accent-foreground hover:opacity-90 active:scale-95"
               isDisabled={isSubmitting}
             >
               <FiUserPlus className="mr-1 text-sm" />
@@ -117,7 +117,7 @@ export default function RegisterPage() {
           {/* Footer */}
           <p className="pt-1 text-center text-xs text-slate-500">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-indigo-600 hover:underline">
+            <Link href="/login" className="font-semibold text-accent hover:underline">
               Log in
             </Link>
           </p>
