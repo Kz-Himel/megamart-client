@@ -6,6 +6,7 @@ import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { TopBrands } from "@/components/home/TopBrands";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CtaSection } from "@/components/home/CtaSection";
+import { PopularPicks } from "@/components/home/PopularPicks";
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
       <FeaturedProducts />
       <CategoriesSection />
       <TopBrands />
+      <PopularPicks />
       {/* Not in the reference design — kept since they're existing, real
           functionality (reviews, CTA), just placed after the matched
           sections rather than removed. */}
