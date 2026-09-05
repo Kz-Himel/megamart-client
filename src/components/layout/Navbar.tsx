@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -43,6 +43,27 @@ export function Navbar() {
   const profileHref = isAdmin ? "/dashboard" : "/account/profile";
   const profileLabel = isAdmin ? "Admin dashboard" : "My profile";
 
+  // Row 1 and Row 3 collapse on scroll down, expand on scroll up.
+  // Row 2 (logo/search/account) is separately sticky and never hides.
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 80) {
+        setIsHidden(false);
+      } else if (currentScrollY > lastScrollY.current) {
+        setIsHidden(true); // scrolling down
+      } else {
+        setIsHidden(false); // scrolling up
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -58,38 +79,45 @@ export function Navbar() {
   );
 
   return (
-    <header className="sticky top-0 z-50 bg-white">
-      {/* Row 1 — utility bar */}
-      <div className="hidden bg-[#F6F6F6] sm:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs text-slate-600 sm:px-6">
-          <span>Welcome to Ankara!</span>
-          <div className="flex items-center gap-3">
-            {/* Static/decorative — no delivery-location feature exists in the backend,
-                so this isn't a real picker, just the reference's visual element. */}
-            <span className="flex items-center gap-1.5 text-slate-600">
-              <FiMapPin className="text-sm text-accent" aria-hidden="true" />
-              Deliver to <strong className="font-semibold text-slate-800">423651</strong>
-            </span>
-            <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
-            <Link
-              href="/orders"
-              className="flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-accent"
-            >
-              <FiTruck className="text-sm text-accent" aria-hidden="true" />
-              Track your order
-            </Link>
-            <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
-            {/* Static/decorative — no offers/promotions feature exists yet. */}
-            <span className="flex items-center gap-1.5 text-slate-600">
-              <PiSealPercentBold className="text-sm text-accent" aria-hidden="true" />
-              All Offers
-            </span>
+    <header className="relative z-50 bg-white">
+      {/* Row 1 — utility bar. Collapses on scroll down, expands on scroll up —
+          Row 2 below stays put and pinned. */}
+      <div
+        className={`hidden overflow-hidden bg-[#F6F6F6] transition-all duration-300 sm:grid ${
+          isHidden ? "sm:grid-rows-[0fr]" : "sm:grid-rows-[1fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs text-slate-600 sm:px-6">
+            <span>Welcome to Ankara!</span>
+            <div className="flex items-center gap-3">
+              {/* Static/decorative — no delivery-location feature exists in the backend,
+                  so this isn't a real picker, just the reference's visual element. */}
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <FiMapPin className="text-sm text-accent" aria-hidden="true" />
+                Deliver to <strong className="font-semibold text-slate-800">423651</strong>
+              </span>
+              <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
+              <Link
+                href="/orders"
+                className="flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-accent"
+              >
+                <FiTruck className="text-sm text-accent" aria-hidden="true" />
+                Track your order
+              </Link>
+              <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
+              {/* Static/decorative — no offers/promotions feature exists yet. */}
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <PiSealPercentBold className="text-sm text-accent" aria-hidden="true" />
+                All Offers
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Row 2 — logo, search, account */}
-      <div className="border-b border-border">
+      {/* Row 2 — logo, search, account. Always pinned — never hides. */}
+      <div className="sticky top-0 z-40 border-b border-border bg-white">
         <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3.5 sm:px-6">
           <div className="flex flex-shrink-0 items-center gap-1">
             <button
@@ -185,10 +213,19 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Row 3 — category pill nav (real categories) */}
-      <Suspense fallback={null}>
-        <CategoryNav variant="desktop" />
-      </Suspense>
+      {/* Row 3 — category pill nav (real categories). Collapses with Row 1,
+          Row 2 above stays pinned regardless. */}
+      <div
+        className={`grid overflow-hidden transition-all duration-300 ${
+          isHidden ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <Suspense fallback={null}>
+            <CategoryNav variant="desktop" />
+          </Suspense>
+        </div>
+      </div>
 
       {/* Mobile Menu Dropdown */}
       <AnimatePresence>

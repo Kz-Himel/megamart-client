@@ -78,7 +78,7 @@ export default function ProductsPage() {
   return (
     <div>
       <div className="mb-8">
-        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-indigo-600">
+        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-accent">
           Catalog
         </span>
         <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -100,7 +100,7 @@ export default function ProductsPage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products..."
             aria-label="Search products"
-            className="w-full rounded-full border border-slate-200/80 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
+            className="w-full rounded-full border border-border bg-[#F6F6F6] py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10"
           />
         </div>
 
@@ -109,7 +109,7 @@ export default function ProductsPage() {
           onChange={(e) => setCategoryId(e.target.value)}
           disabled={isCategoriesLoading}
           aria-label="Filter by category"
-          className="rounded-full border border-slate-200/80 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 sm:w-52"
+          className="rounded-full border border-border bg-[#F6F6F6] px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10 sm:w-52"
         >
           <option value="">All categories</option>
           {categories
@@ -125,7 +125,7 @@ export default function ProductsPage() {
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
           aria-label="Sort products"
-          className="rounded-full border border-slate-200/80 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 sm:w-48"
+          className="rounded-full border border-border bg-[#F6F6F6] px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10 sm:w-48"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -139,12 +139,12 @@ export default function ProductsPage() {
       {hasActiveFilters && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           {activeCategory && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
               {activeCategory.name}
               <button
                 onClick={() => setCategoryId("")}
                 aria-label={`Remove ${activeCategory.name} filter`}
-                className="rounded-full hover:text-indigo-900"
+                className="rounded-full hover:opacity-70"
               >
                 <FiX />
               </button>
@@ -155,7 +155,7 @@ export default function ProductsPage() {
               setCategoryId("");
               setSearch("");
             }}
-            className="text-xs font-semibold text-slate-500 hover:text-indigo-600"
+            className="text-xs font-semibold text-slate-500 hover:text-accent"
           >
             Clear all
           </button>
@@ -194,7 +194,7 @@ export default function ProductsPage() {
                   setCategoryId("");
                   setSearch("");
                 }}
-                className="mt-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                className="mt-1 text-xs font-semibold text-accent hover:opacity-80"
               >
                 Clear filters
               </button>

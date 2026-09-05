@@ -15,15 +15,11 @@ export default function HomePage() {
     // creating a second (invalid) nested <main>.
     <div className="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6">
       <HeroSection />
-      <FeaturedProducts />
       <CategoriesSection />
+      <FeaturedProducts />
       <TopBrands />
       <PopularPicks />
-      {/* Not in the reference design — kept since they're existing, real
-          functionality (reviews, CTA), just placed after the matched
-          sections rather than removed. */}
       <Testimonials />
-      {/* <ReviewsSection /> */}
       <CtaSection />
     </div>
   );
