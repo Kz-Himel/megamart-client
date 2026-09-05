@@ -8,14 +8,9 @@ import { useProduct, useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/lib/auth/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ProductCard } from "@/components/products/ProductCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ReviewList } from "@/components/reviews/ReviewList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
-
-const STATUS_STYLES: Record<string, string> = {
-  ACTIVE: "bg-emerald-50 text-emerald-600 border-emerald-200",
-  INACTIVE: "bg-rose-50 text-rose-600 border-rose-200",
-  OUT_OF_STOCK: "bg-amber-50 text-amber-600 border-amber-200",
-};
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -59,7 +54,7 @@ export default function ProductDetailPage() {
         </div>
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
+          className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition-opacity hover:opacity-90"
         >
           <FiArrowLeft /> Back to products
         </Link>
@@ -88,7 +83,7 @@ export default function ProductDetailPage() {
       {/* Product Hero Section */}
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
         {/* Product Image Preview */}
-        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-slate-100 bg-slate-50/70 p-8 shadow-sm">
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-border bg-[#F6F6F6] p-8">
           {product.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -107,9 +102,7 @@ export default function ProductDetailPage() {
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
               <FiTag className="text-xs" /> {product.category?.name ?? "Uncategorized"}
             </span>
-            <span className={`rounded-full border px-3 py-0.5 text-xs font-semibold ${STATUS_STYLES[product.status] || "bg-slate-100 text-slate-600"}`}>
-              {product.status.replace("_", " ")}
-            </span>
+            <StatusBadge status={product.status} />
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
@@ -118,11 +111,11 @@ export default function ProductDetailPage() {
           <div className="mt-2.5 flex items-center gap-2">
             {averageRating !== null ? (
               <>
-                <div className="flex items-center gap-1 text-amber-400">
+                <div className="flex items-center gap-1 text-price">
                   {[...Array(5)].map((_, i) => (
                     <FiStar
                       key={i}
-                      className={i < Math.round(averageRating) ? "fill-amber-400 text-amber-400 text-sm" : "text-slate-200 text-sm"}
+                      className={i < Math.round(averageRating) ? "fill-price text-price text-sm" : "text-slate-200 text-sm"}
                     />
                   ))}
                 </div>
@@ -143,7 +136,7 @@ export default function ProductDetailPage() {
               <span className="text-3xl tracking-tight">{product.price.toFixed(2)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-              <FiCheckCircle className="text-emerald-500" />
+              <FiCheckCircle className="text-success" />
               <span>
                 {product.stock > 0 ? `${product.stock} units available` : "Out of stock"}
               </span>
@@ -156,7 +149,7 @@ export default function ProductDetailPage() {
               <Link href={`/orders/new?productId=${product.id}`}>
                 <Button
                   size="lg"
-                  className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-100 sm:w-auto sm:px-10"
+                  className="w-full rounded-2xl bg-accent hover:opacity-90 text-accent-foreground font-semibold sm:w-auto sm:px-10"
                 >
                   <FiShoppingCart className="mr-1 text-lg" /> Order Now
                 </Button>
@@ -191,9 +184,9 @@ export default function ProductDetailPage() {
           </div>
 
           {averageRating !== null && (
-            <div className="flex items-center gap-1.5 rounded-2xl bg-amber-50 px-3.5 py-1.5 border border-amber-200/60">
-              <FiStar className="fill-amber-400 text-amber-400 text-base" />
-              <span className="text-sm font-bold text-amber-900">{averageRating.toFixed(1)} out of 5</span>
+            <div className="flex items-center gap-1.5 rounded-2xl bg-price/10 px-3.5 py-1.5 border border-price/20">
+              <FiStar className="fill-price text-price text-base" />
+              <span className="text-sm font-bold text-price-foreground">{averageRating.toFixed(1)} out of 5</span>
             </div>
           )}
         </div>
