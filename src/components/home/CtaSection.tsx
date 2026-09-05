@@ -16,14 +16,14 @@ export function CtaSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white px-6 py-12 text-center shadow-sm sm:px-12"
+        className="relative overflow-hidden rounded-3xl border border-border bg-white px-6 py-12 text-center shadow-sm sm:px-12"
       >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-1"
           style={{
             background:
-              "linear-gradient(90deg, #4f46e5, #06b6d4, #4f46e5)",
+              "linear-gradient(90deg, var(--accent), var(--navy), var(--accent))",
           }}
         />
         <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -36,7 +36,7 @@ export function CtaSection() {
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link href={isAuthenticated ? "/products" : "/register"}>
-            <Button size="lg" className="rounded-full bg-indigo-600 font-semibold text-white shadow-md transition-transform hover:bg-indigo-700 active:scale-95">
+            <Button size="lg" className="rounded-full bg-accent font-semibold text-accent-foreground transition-transform hover:opacity-90 active:scale-95">
               {isAuthenticated ? "Browse products" : "Create an account"}{" "}
               <FiArrowRight className="ml-1" />
             </Button>
