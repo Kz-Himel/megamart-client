@@ -43,23 +43,38 @@ export function Navbar() {
   const profileHref = isAdmin ? "/dashboard" : "/account/profile";
   const profileLabel = isAdmin ? "Admin dashboard" : "My profile";
 
-  // Row 1 and Row 3 collapse on scroll down, expand on scroll up.
-  // Row 2 (logo/search/account) is separately sticky and never hides.
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY < 80) {
-        setIsHidden(false);
-      } else if (currentScrollY > lastScrollY.current) {
-        setIsHidden(true); // scrolling down
-      } else {
-        setIsHidden(false); // scrolling up
-      }
-      lastScrollY.current = currentScrollY;
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
+
+        // ছোটখাটো স্ক্রোল ইগনোর করবে যাতে কাঁপাকাঁপি না হয়
+        if (scrollDifference < 10) {
+          tickingRef.current = false;
+          return;
+        }
+
+        if (currentScrollY <= 100) {
+          setIsHidden(false); // পেজের উপরে থাকলে সবসময় ফুল নেভবার
+        } else if (currentScrollY > lastScrollY.current) {
+          setIsHidden(true); // নিচে নামলে হাইড হবে
+        } else {
+          setIsHidden(false); // উপরে উঠলে দেখাবে
+        }
+
+        lastScrollY.current = currentScrollY;
+        tickingRef.current = false;
+      });
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -79,70 +94,71 @@ export function Navbar() {
   );
 
   return (
-    <header className="relative z-50 bg-white">
-      {/* Row 1 — utility bar. Collapses on scroll down, expands on scroll up —
-          Row 2 below stays put and pinned. */}
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
+      {/* Row 1 — Utility bar */}
       <div
-        className={`hidden overflow-hidden bg-[#F6F6F6] transition-all duration-300 sm:grid ${
-          isHidden ? "sm:grid-rows-[0fr]" : "sm:grid-rows-[1fr]"
+        className={`hidden overflow-hidden bg-[#F6F6F6] transition-[max-height,opacity,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sm:block ${
+          isHidden
+            ? "max-h-0 -translate-y-2 opacity-0"
+            : "max-h-12 translate-y-0 opacity-100"
         }`}
       >
-        <div className="overflow-hidden">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs text-slate-600 sm:px-6">
-            <span>Welcome to Ankara!</span>
-            <div className="flex items-center gap-3">
-              {/* Static/decorative — no delivery-location feature exists in the backend,
-                  so this isn't a real picker, just the reference's visual element. */}
-              <span className="flex items-center gap-1.5 text-slate-600">
-                <FiMapPin className="text-sm text-accent" aria-hidden="true" />
-                Deliver to <strong className="font-semibold text-slate-800">423651</strong>
-              </span>
-              <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
-              <Link
-                href="/orders"
-                className="flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-accent"
-              >
-                <FiTruck className="text-sm text-accent" aria-hidden="true" />
-                Track your order
-              </Link>
-              <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
-              {/* Static/decorative — no offers/promotions feature exists yet. */}
-              <span className="flex items-center gap-1.5 text-slate-600">
-                <PiSealPercentBold className="text-sm text-accent" aria-hidden="true" />
-                All Offers
-              </span>
-            </div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs text-slate-600 sm:px-6">
+          <span>Welcome to Ankara!</span>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <FiMapPin className="text-sm text-accent" aria-hidden="true" />
+              Deliver to <strong className="font-semibold text-slate-800">423651</strong>
+            </span>
+            <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
+            <Link
+              href="/orders"
+              className="flex items-center gap-1.5 font-medium text-slate-600 transition-colors hover:text-accent"
+            >
+              <FiTruck className="text-sm text-accent" aria-hidden="true" />
+              Track your order
+            </Link>
+            <span className="h-3.5 w-px bg-slate-300" aria-hidden="true" />
+            <span className="flex items-center gap-1.5 text-slate-600">
+              <PiSealPercentBold className="text-sm text-accent" aria-hidden="true" />
+              All Offers
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Row 2 — logo, search, account. Always pinned — never hides. */}
-      <div className="sticky top-0 z-40 border-b border-border bg-white">
+      {/* Row 2 — MAIN NAVBAR (Always Sticky) */}
+      <div className="relative z-10 border-b border-border bg-white">
         <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3.5 sm:px-6">
           <div className="flex flex-shrink-0 items-center gap-1">
             <button
-              className="p-1 text-accent md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md"
+              className="rounded-md p-1 text-accent hover:bg-slate-100 md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
-              {isMenuOpen ? <FiX className="text-2xl" aria-hidden="true" /> : <PiTextAlignLeftBold className="text-2xl" aria-hidden="true" />}
+              {isMenuOpen ? (
+                <FiX className="text-2xl" aria-hidden="true" />
+              ) : (
+                <PiTextAlignLeftBold className="text-2xl" aria-hidden="true" />
+              )}
             </button>
 
             <Link
               href="/"
-              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg p-0.5"
+              className="flex items-center gap-2 rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <PiTextAlignLeftBold className="hidden text-2xl text-accent md:block" aria-hidden="true" />
-              <span className="font-display text-lg font-bold tracking-tight text-accent">
+              <span className="font-display text-xl font-bold tracking-tight text-accent">
                 Ankara
               </span>
             </Link>
           </div>
 
+          {/* Search Bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="hidden flex-1 max-w-xl items-center mx-4 md:flex"
+            className="mx-4 hidden flex-1 max-w-xl items-center md:flex"
             role="search"
           >
             <div className="flex w-full items-center overflow-hidden rounded-full border border-border bg-[#F6F6F6] px-4 transition-all focus-within:border-accent focus-within:bg-white focus-within:ring-2 focus-within:ring-accent/10">
@@ -165,13 +181,14 @@ export function Navbar() {
             </div>
           </form>
 
+          {/* Account & Cart Actions */}
           <div className="ml-auto flex flex-shrink-0 items-center gap-4">
             {isAuthenticated ? (
               <div className="hidden items-center gap-3 sm:flex">
                 <Link
                   href={profileHref}
                   aria-label={profileLabel}
-                  className="group flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full"
+                  className="group flex items-center gap-2 rounded-full text-sm font-semibold text-slate-700 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent ring-2 ring-accent/20 transition-all group-hover:ring-accent/40">
                     {initials(user?.name)}
@@ -183,7 +200,7 @@ export function Navbar() {
                   variant="ghost"
                   isIconOnly
                   onPress={logout}
-                  className="text-slate-400 hover:text-rose-600 min-w-8 h-8 rounded-full"
+                  className="h-8 min-w-8 rounded-full text-slate-400 hover:text-rose-600"
                   aria-label="Log out"
                 >
                   <FiLogOut className="text-sm" aria-hidden="true" />
@@ -204,7 +221,7 @@ export function Navbar() {
             <Link
               href="/orders"
               aria-label={ordersLabel}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded px-1 py-0.5"
+              className="flex items-center gap-1.5 rounded px-1 py-0.5 text-sm font-semibold text-slate-700 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <FiShoppingCart className="text-base text-accent" aria-hidden="true" />
               <span className="hidden lg:inline">{ordersLabel}</span>
@@ -213,18 +230,15 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Row 3 — category pill nav (real categories). Collapses with Row 1,
-          Row 2 above stays pinned regardless. */}
+      {/* Row 3 — Category Navigation */}
       <div
-        className={`grid overflow-hidden transition-all duration-300 ${
-          isHidden ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+        className={`overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isHidden ? "max-h-0 -translate-y-2 opacity-0" : "max-h-16 translate-y-0 opacity-100"
         }`}
       >
-        <div className="overflow-hidden">
-          <Suspense fallback={null}>
-            <CategoryNav variant="desktop" />
-          </Suspense>
-        </div>
+        <Suspense fallback={null}>
+          <CategoryNav variant="desktop" />
+        </Suspense>
       </div>
 
       {/* Mobile Menu Dropdown */}
@@ -234,21 +248,25 @@ export function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden border-b border-border bg-white md:hidden"
           >
             <div className="flex flex-col gap-3 px-4 py-4">
-              <form onSubmit={handleSearchSubmit} className="flex items-center mb-2" role="search">
+              <form onSubmit={handleSearchSubmit} className="mb-2 flex items-center" role="search">
                 <div className="flex w-full items-center overflow-hidden rounded-full border border-border bg-[#F6F6F6] pl-3 pr-1">
                   <input
                     type="search"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     placeholder="Search products..."
-                    className="w-full bg-transparent py-2 text-xs outline-none text-slate-800"
+                    className="w-full bg-transparent py-2 text-xs text-slate-800 outline-none"
                     aria-label="Search products"
                   />
-                  <button type="submit" aria-label="Submit search" className="rounded-full bg-accent p-1.5 text-accent-foreground">
+                  <button
+                    type="submit"
+                    aria-label="Submit search"
+                    className="rounded-full bg-accent p-1.5 text-accent-foreground"
+                  >
                     <FiSearch className="text-xs" aria-hidden="true" />
                   </button>
                 </div>
@@ -261,12 +279,12 @@ export function Navbar() {
               <Link
                 href="/orders"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-2 text-xs font-semibold text-slate-700 py-1.5 border-t border-border pt-3"
+                className="flex items-center gap-2 border-t border-border py-1.5 pt-3 text-xs font-semibold text-slate-700"
               >
                 <FiShoppingCart aria-hidden="true" /> {ordersLabel}
               </Link>
 
-              <div className="pt-2 border-t border-border mt-1">
+              <div className="mt-1 border-t border-border pt-2">
                 {isAuthenticated ? (
                   <div className="flex items-center justify-between">
                     <Link
@@ -274,7 +292,7 @@ export function Navbar() {
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-2 text-xs font-semibold text-slate-700"
                     >
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-bold">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
                         {initials(user?.name)}
                       </span>
                       {profileLabel}
@@ -299,7 +317,7 @@ export function Navbar() {
                       </Button>
                     </Link>
                     <Link href="/register" onClick={() => setIsMenuOpen(false)} className="flex-1">
-                      <Button size="sm" variant="primary" className="w-full bg-accent text-accent-foreground text-xs">
+                      <Button size="sm" variant="primary" className="w-full bg-accent text-xs text-accent-foreground">
                         Register
                       </Button>
                     </Link>
