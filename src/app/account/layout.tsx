@@ -48,8 +48,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                 href={href}
                 className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-indigo-50 text-indigo-600"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                    ? "bg-accent/10 text-accent"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-accent"
                 }`}
               >
                 <Icon /> {label}

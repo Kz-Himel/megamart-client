@@ -11,7 +11,7 @@ import { OrderStatus } from "@/types/order.types";
 
 const STATUS_BAR_COLORS: Record<OrderStatus, string> = {
   PENDING: "bg-amber-400",
-  CONFIRMED: "bg-indigo-400",
+  CONFIRMED: "bg-accent",
   SHIPPED: "bg-amber-500",
   DELIVERED: "bg-emerald-500",
   CANCELLED: "bg-rose-400",
@@ -53,7 +53,7 @@ export default function AccountOverviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-indigo-600">
+        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-accent">
           My account
         </span>
         <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900">
@@ -69,7 +69,7 @@ export default function AccountOverviewPage() {
           action={
             <Link
               href="/products"
-              className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700"
+              className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition-opacity hover:opacity-90"
             >
               Browse products
             </Link>
@@ -112,7 +112,7 @@ export default function AccountOverviewPage() {
           <div>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-800">Recent orders</h2>
-              <Link href="/orders" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+              <Link href="/orders" className="text-xs font-semibold text-accent hover:opacity-80">
                 View all
               </Link>
             </div>
@@ -127,7 +127,7 @@ export default function AccountOverviewPage() {
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+      <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
         {icon}
       </div>
       <p className="text-xl font-bold text-slate-900">{value}</p>

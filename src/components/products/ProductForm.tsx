@@ -135,7 +135,7 @@ export function ProductForm({
             <div className="flex items-center gap-2">
               <label
                 htmlFor="product-image-upload"
-                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-indigo-500 hover:text-indigo-600"
+                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-accent hover:text-accent"
               >
                 <FiUploadCloud />
                 {isUploading ? "Uploading..." : imageUrl ? "Replace image" : "Upload image"}

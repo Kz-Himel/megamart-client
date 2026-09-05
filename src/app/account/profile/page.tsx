@@ -41,7 +41,7 @@ export default function AccountProfilePage() {
   return (
     <div className="mx-auto max-w-lg">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-xl text-indigo-600">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-xl text-accent">
           <FiUser />
         </div>
         <div>
@@ -86,7 +86,7 @@ export default function AccountProfilePage() {
 
         <Button
           type="submit"
-          className="w-full rounded-full bg-indigo-600 text-white hover:bg-indigo-700"
+          className="w-full rounded-full bg-accent text-accent-foreground hover:opacity-90"
           isDisabled={updateUser.isPending}
         >
           {updateUser.isPending ? "Saving..." : "Save changes"}
