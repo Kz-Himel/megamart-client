@@ -36,13 +36,13 @@ import { OrderStatus } from "@/types/order.types";
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: "#f59e0b",
-  CONFIRMED: "#818cf8",
+  CONFIRMED: "#0090ce",
   SHIPPED: "#fbbf24",
   DELIVERED: "#10b981",
   CANCELLED: "#f43f5e",
 };
 
-const ACCENT = "#4f46e5";
+const ACCENT = "#0090ce";
 
 function StatCard({
   icon,
@@ -62,7 +62,7 @@ function StatCard({
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
     >
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
         {icon}
       </div>
       <p className="font-mono text-2xl font-semibold text-slate-900">{value}</p>
@@ -168,7 +168,7 @@ export default function DashboardOverviewPage() {
   return (
     <div>
       <div className="mb-8">
-        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-indigo-600">
+        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-accent">
           Admin
         </span>
         <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900">Overview</h1>

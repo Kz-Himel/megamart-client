@@ -13,7 +13,7 @@ import {
   FiGift 
 } from "react-icons/fi";
 
-// ১. ক্যাটাগরির নাম অনুযায়ী আইকন ম্যাপিং
+// ১. ক্যাটাগরির নাম অনুযায়ী আইকন ম্যাপিং
 const getCategoryIcon = (categoryName: string) => {
   const name = categoryName.toLowerCase();
   
@@ -50,7 +50,7 @@ const getCategoryIcon = (categoryName: string) => {
 const COLOR_THEMES = [
   {
     bg: "bg-purple-100/70 border-purple-200",
-    hoverBg: "hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600",
+    hoverBg: "hover:bg-gradient-to-r hover:from-purple-600 hover:to-violet-600",
     text: "text-purple-950 group-hover:text-white",
     subText: "text-purple-700/80 group-hover:text-purple-100",
     iconBox: "bg-white/80 group-hover:bg-white/20 text-purple-600 group-hover:text-white",
@@ -90,7 +90,7 @@ const COLOR_THEMES = [
   },
   {
     bg: "bg-sky-100/70 border-sky-200",
-    hoverBg: "hover:bg-gradient-to-r hover:from-sky-600 hover:to-indigo-600",
+    hoverBg: "hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-600",
     text: "text-sky-950 group-hover:text-white",
     subText: "text-sky-700/80 group-hover:text-sky-100",
     iconBox: "bg-white/80 group-hover:bg-white/20 text-sky-600 group-hover:text-white",
