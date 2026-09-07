@@ -11,7 +11,7 @@ import { ProductGridSkeleton } from "@/components/products/ProductCardSkeleton";
 type SortOption = "newest" | "price-asc" | "price-desc";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "newest", label: "Newest" },
+  { value: "newest", label: "Newest Arrivals" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
 ];
@@ -76,23 +76,23 @@ export default function ProductsPage() {
   const hasActiveFilters = Boolean(categoryId || search);
 
   return (
-    <div>
-      <div className="mb-8">
-        <span className="mb-1 inline-block text-xs font-bold uppercase tracking-wider text-accent">
-          Catalog
-        </span>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          All products
+    <div className="py-2">
+      {/* MegaMart Standard Page Header */}
+      <div className="mb-6 border-b border-slate-200 pb-3">
+        <h1 className="relative inline-block text-xl font-extrabold text-slate-800 sm:text-2xl">
+          All <span className="text-sky-600">Products</span>
+          <span className="absolute -bottom-[13px] left-0 h-[3px] w-full bg-sky-500 rounded-full" />
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
           {isProductsLoading
-            ? "Loading the catalog..."
-            : `${filtered.length} ${filtered.length === 1 ? "product" : "products"} available`}
+            ? "Loading catalog..."
+            : `Showing ${filtered.length} ${filtered.length === 1 ? "product" : "products"}`}
         </p>
       </div>
 
-      {/* Filter bar */}
+      {/* Filter Bar */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* Search Field */}
         <div className="relative flex-1">
           <FiSearch className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -100,18 +100,19 @@ export default function ProductsPage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products..."
             aria-label="Search products"
-            className="w-full rounded-full border border-border bg-[#F6F6F6] py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10"
+            className="w-full rounded-full border border-slate-200 bg-[#F6F6F6] py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/10"
           />
         </div>
 
+        {/* Category Dropdown */}
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           disabled={isCategoriesLoading}
           aria-label="Filter by category"
-          className="rounded-full border border-border bg-[#F6F6F6] px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10 sm:w-52"
+          className="rounded-full border border-slate-200 bg-[#F6F6F6] px-4 py-2.5 text-xs sm:text-sm text-slate-700 outline-none transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/10 sm:w-52"
         >
-          <option value="">All categories</option>
+          <option value="">All Categories</option>
           {categories
             ?.filter((c) => c.status === "ACTIVE")
             .map((cat) => (
@@ -121,11 +122,12 @@ export default function ProductsPage() {
             ))}
         </select>
 
+        {/* Sort Dropdown */}
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
           aria-label="Sort products"
-          className="rounded-full border border-border bg-[#F6F6F6] px-4 py-2.5 text-sm text-slate-700 outline-none transition-all focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/10 sm:w-48"
+          className="rounded-full border border-slate-200 bg-[#F6F6F6] px-4 py-2.5 text-xs sm:text-sm text-slate-700 outline-none transition-all focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/10 sm:w-48"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -135,11 +137,11 @@ export default function ProductsPage() {
         </select>
       </div>
 
-      {/* Active filter chip */}
+      {/* Active Filter Badge */}
       {hasActiveFilters && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           {activeCategory && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 border border-sky-100">
               {activeCategory.name}
               <button
                 onClick={() => setCategoryId("")}
@@ -155,14 +157,14 @@ export default function ProductsPage() {
               setCategoryId("");
               setSearch("");
             }}
-            className="text-xs font-semibold text-slate-500 hover:text-accent"
+            className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors"
           >
             Clear all
           </button>
         </div>
       )}
 
-      {/* Error state */}
+      {/* Error State */}
       {isProductsError && (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-rose-200 bg-rose-50/50 py-16 text-center">
           <FiAlertCircle className="text-3xl text-rose-400" />
@@ -179,10 +181,10 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Loading state */}
-      {!isProductsError && isProductsLoading && <ProductGridSkeleton count={6} />}
+      {/* Loading State */}
+      {!isProductsError && isProductsLoading && <ProductGridSkeleton count={8} />}
 
-      {/* Loaded */}
+      {/* Loaded Content */}
       {!isProductsError && !isProductsLoading && (
         <>
           {filtered.length === 0 && hasActiveFilters ? (
@@ -194,7 +196,7 @@ export default function ProductsPage() {
                   setCategoryId("");
                   setSearch("");
                 }}
-                className="mt-1 text-xs font-semibold text-accent hover:opacity-80"
+                className="mt-1 text-xs font-semibold text-sky-600 hover:underline"
               >
                 Clear filters
               </button>

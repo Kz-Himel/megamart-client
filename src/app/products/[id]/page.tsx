@@ -2,7 +2,18 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { FiBox, FiShoppingCart, FiTag, FiStar, FiCheckCircle, FiAlertCircle, FiArrowLeft } from "react-icons/fi";
+import { 
+  FiBox, 
+  FiShoppingCart, 
+  FiTag, 
+  FiStar, 
+  FiCheckCircle, 
+  FiAlertCircle, 
+  FiArrowLeft,
+  FiTruck,
+  FiShield,
+  FiRotateCcw
+} from "react-icons/fi";
 import { Button } from "@heroui/react";
 import { useProduct, useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -21,7 +32,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <div className="py-16">
-        <LoadingSpinner label="Loading product..." />
+        <LoadingSpinner label="Loading product details..." />
       </div>
     );
   }
@@ -54,7 +65,7 @@ export default function ProductDetailPage() {
         </div>
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-foreground transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:bg-sky-700"
         >
           <FiArrowLeft /> Back to products
         </Link>
@@ -64,62 +75,82 @@ export default function ProductDetailPage() {
 
   const canOrder = product.status === "ACTIVE" && product.stock > 0;
 
-  // Real rating computed from this product's actual reviews — never a
-  // placeholder fallback.
+  // Real rating computed from product reviews
   const reviews = product.reviews ?? [];
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((acc, rev) => acc + (rev.rating || 0), 0) / reviews.length
       : null;
 
-  // Related products: same category, drawn from data we already have —
-  // no new endpoint required.
+  // Related products: same category
   const related = (allProducts ?? [])
     .filter((p) => p.id !== product.id && p.categoryId === product.categoryId && p.status === "ACTIVE")
     .slice(0, 4);
 
   return (
-    <div className="mx-auto max-w-6xl py-4 space-y-12">
+    <div className="mx-auto max-w-6xl py-4 space-y-10">
       {/* Product Hero Section */}
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
-        {/* Product Image Preview */}
-        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-border bg-[#F6F6F6] p-8">
-          {product.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.image}
-              alt={product.name}
-              className="h-full w-full object-contain transition-transform duration-500 hover:scale-105"
-            />
-          ) : (
-            <FiBox className="text-5xl text-slate-300" />
-          )}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12 items-start">
+        {/* Product Image Preview - Reduced Height */}
+        <div className="flex flex-col gap-4">
+          <div className="relative flex h-80 sm:h-96 w-full items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+            {product.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-full w-full object-contain transition-transform duration-500 hover:scale-105"
+              />
+            ) : (
+              <FiBox className="text-5xl text-slate-300" />
+            )}
+          </div>
+
+          {/* Value Badges */}
+          <div className="grid grid-cols-3 gap-2 text-center text-[11px] text-slate-600">
+            <div className="flex flex-col items-center gap-1 rounded-xl bg-slate-50 p-2.5 border border-slate-100">
+              <FiTruck className="text-sky-600 text-base" />
+              <span className="font-semibold">Fast Shipping</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 rounded-xl bg-slate-50 p-2.5 border border-slate-100">
+              <FiShield className="text-sky-600 text-base" />
+              <span className="font-semibold">100% Genuine</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 rounded-xl bg-slate-50 p-2.5 border border-slate-100">
+              <FiRotateCcw className="text-sky-600 text-base" />
+              <span className="font-semibold">Easy Returns</span>
+            </div>
+          </div>
         </div>
 
         {/* Product Details & Purchase Actions */}
         <div className="flex flex-col justify-center">
           <div className="mb-3 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 border border-sky-100">
               <FiTag className="text-xs" /> {product.category?.name ?? "Uncategorized"}
             </span>
             <StatusBadge status={product.status} />
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
+          <h1 className="text-2xl font-extrabold text-slate-800 sm:text-3xl">{product.name}</h1>
 
           {/* Rating Summary */}
           <div className="mt-2.5 flex items-center gap-2">
             {averageRating !== null ? (
               <>
-                <div className="flex items-center gap-1 text-price">
+                <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <FiStar
                       key={i}
-                      className={i < Math.round(averageRating) ? "fill-price text-price text-sm" : "text-slate-200 text-sm"}
+                      className={
+                        i < Math.round(averageRating)
+                          ? "fill-amber-400 text-amber-400 text-sm"
+                          : "text-slate-200 text-sm"
+                      }
                     />
                   ))}
                 </div>
-                <span className="text-xs font-semibold text-slate-700">{averageRating.toFixed(1)}</span>
+                <span className="text-xs font-bold text-slate-700">{averageRating.toFixed(1)}</span>
                 <span className="text-xs text-slate-400">({reviews.length} reviews)</span>
               </>
             ) : (
@@ -127,18 +158,18 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          <p className="mt-4 leading-relaxed text-slate-600 text-sm">{product.description}</p>
+          <p className="mt-4 leading-relaxed text-slate-600 text-xs sm:text-sm">{product.description}</p>
 
           {/* Price & Stock Section */}
-          <div className="mt-6 flex items-baseline gap-3 border-y border-slate-100 py-4">
-            <div className="flex items-baseline gap-0.5 font-bold text-slate-900">
+          <div className="mt-6 flex items-baseline gap-4 border-y border-slate-200 py-4">
+            <div className="flex items-baseline gap-0.5 font-extrabold text-slate-900">
               <span className="text-lg">$</span>
               <span className="text-3xl tracking-tight">{product.price.toFixed(2)}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-              <FiCheckCircle className="text-success" />
-              <span>
-                {product.stock > 0 ? `${product.stock} units available` : "Out of stock"}
+              <FiCheckCircle className={product.stock > 0 ? "text-emerald-500" : "text-rose-500"} />
+              <span className={product.stock > 0 ? "text-emerald-600 font-semibold" : "text-rose-500 font-semibold"}>
+                {product.stock > 0 ? `${product.stock} units in stock` : "Out of stock"}
               </span>
             </div>
           </div>
@@ -149,7 +180,7 @@ export default function ProductDetailPage() {
               <Link href={`/orders/new?productId=${product.id}`}>
                 <Button
                   size="lg"
-                  className="w-full rounded-2xl bg-accent hover:opacity-90 text-accent-foreground font-semibold sm:w-auto sm:px-10"
+                  className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold shadow-md transition-all sm:w-auto sm:px-10"
                 >
                   <FiShoppingCart className="mr-1 text-lg" /> Order Now
                 </Button>
@@ -165,8 +196,13 @@ export default function ProductDetailPage() {
 
       {/* Related Products */}
       {related.length > 0 && (
-        <div className="border-t border-slate-100 pt-10">
-          <h2 className="mb-5 text-xl font-bold text-slate-900">You might also like</h2>
+        <div className="border-t border-slate-200 pt-8">
+          <div className="mb-6">
+            <h2 className="relative inline-block text-base sm:text-lg font-bold text-slate-800">
+              You might <span className="text-sky-600">also like</span>
+              <span className="absolute -bottom-[13px] left-0 h-[3px] w-full bg-sky-500 rounded-full" />
+            </h2>
+          </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {related.map((p) => (
               <ProductCard key={p.id} product={p} />
@@ -176,24 +212,27 @@ export default function ProductDetailPage() {
       )}
 
       {/* Reviews & Ratings Section */}
-      <div className="border-t border-slate-100 pt-10">
+      <div className="border-t border-slate-200 pt-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Customer Reviews</h2>
-            <p className="text-xs text-slate-500">Read what others think about this product</p>
+            <h2 className="relative inline-block text-base sm:text-lg font-bold text-slate-800">
+              Customer <span className="text-sky-600">Reviews</span>
+              <span className="absolute -bottom-[13px] left-0 h-[3px] w-full bg-sky-500 rounded-full" />
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">Read what others think about this product</p>
           </div>
 
           {averageRating !== null && (
-            <div className="flex items-center gap-1.5 rounded-2xl bg-price/10 px-3.5 py-1.5 border border-price/20">
-              <FiStar className="fill-price text-price text-base" />
-              <span className="text-sm font-bold text-price-foreground">{averageRating.toFixed(1)} out of 5</span>
+            <div className="flex items-center gap-1.5 rounded-2xl bg-amber-50 px-3.5 py-1.5 border border-amber-200">
+              <FiStar className="fill-amber-400 text-amber-400 text-base" />
+              <span className="text-xs sm:text-sm font-bold text-amber-700">{averageRating.toFixed(1)} out of 5</span>
             </div>
           )}
         </div>
 
         {isAuthenticated && (
-          <div className="mb-8 rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
-            <h3 className="mb-3 text-sm font-semibold text-slate-800">Write a Review</h3>
+          <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-xs sm:text-sm font-bold text-slate-800">Write a Review</h3>
             <ReviewForm productId={product.id} />
           </div>
         )}
