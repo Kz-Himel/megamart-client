@@ -2,17 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { FiChevronDown } from "react-icons/fi";
 import { useCategories } from "@/hooks/useCategories";
 
-/**
- * Renders the real-category pill row (desktop, under the header) or the
- * equivalent list (mobile menu). Kept in its own component — rather than
- * inline in Navbar — because it's the only piece that needs
- * `useSearchParams()`, and that hook forces whatever calls it directly into
- * client-only rendering unless it's wrapped in its own `<Suspense>`.
- * Wrapping this component alone keeps the rest of the header (and every
- * static page under it) statically prerenderable.
- */
 export function CategoryNav({
   variant,
   onNavigate,
@@ -30,60 +22,77 @@ export function CategoryNav({
 
   if (variant === "mobile") {
     return (
-      <>
+      <div className="flex flex-col gap-1 py-1">
         <Link
           href="/products"
           onClick={onNavigate}
-          className={`text-xs font-semibold py-1.5 ${
-            pathname === "/products" && !activeCategoryId ? "text-accent" : "text-slate-700"
+          className={`flex items-center justify-between py-2 text-xs font-semibold ${
+            pathname === "/products" && !activeCategoryId
+              ? "text-sky-600 font-bold"
+              : "text-slate-700"
           }`}
         >
-          All Products
+          <span>Groceries / All</span>
+          <FiChevronDown className="text-slate-400" />
         </Link>
         {activeCategories.map((category) => (
           <Link
             key={category.id}
             href={`/products?categoryId=${category.id}`}
             onClick={onNavigate}
-            className={`text-xs font-semibold py-1.5 ${
-              activeCategoryId === category.id ? "text-accent" : "text-slate-700"
+            className={`flex items-center justify-between py-2 text-xs font-medium ${
+              activeCategoryId === category.id
+                ? "text-sky-600 font-bold"
+                : "text-slate-600"
             }`}
           >
-            {category.name}
+            <span>{category.name}</span>
+            <FiChevronDown className="text-slate-400" />
           </Link>
         ))}
-      </>
+      </div>
     );
   }
 
-  if (activeCategories.length === 0) return null;
-
   return (
-    <div className="hidden border-b border-border bg-white md:block">
-      <div className="no-scrollbar mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5 sm:px-6">
+    <div className="hidden border-b border-slate-100 bg-white md:block">
+      <div className="no-scrollbar mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 sm:px-6 text-xs sm:text-sm font-medium">
+        
+        {/* Active Pill / First Category Item (Matching MegaMart Image) */}
         <Link
           href="/products"
-          className={`flex-shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 flex-shrink-0 rounded-full px-3.5 py-1.5 transition-all ${
             pathname === "/products" && !activeCategoryId
-              ? "bg-accent text-accent-foreground"
-              : "text-slate-600 hover:bg-[#F6F6F6]"
+              ? "bg-sky-50 text-sky-600 font-semibold"
+              : "text-slate-600 hover:bg-slate-50"
           }`}
         >
-          All Products
+          <span>Groceries</span>
+          <FiChevronDown className="text-xs text-sky-600" />
         </Link>
-        {activeCategories.map((category) => (
-          <Link
-            key={category.id}
-            href={`/products?categoryId=${category.id}`}
-            className={`flex-shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              activeCategoryId === category.id
-                ? "bg-accent text-accent-foreground"
-                : "text-slate-600 hover:bg-[#F6F6F6]"
-            }`}
-          >
-            {category.name}
-          </Link>
-        ))}
+
+        {/* Dynamic Category List with Dropdown Indicators */}
+        {activeCategories.map((category) => {
+          const isActive = activeCategoryId === category.id;
+          return (
+            <Link
+              key={category.id}
+              href={`/products?categoryId=${category.id}`}
+              className={`flex items-center gap-1.5 flex-shrink-0 rounded-full px-3.5 py-1.5 transition-all ${
+                isActive
+                  ? "bg-sky-50 text-sky-600 font-semibold"
+                  : "text-slate-600 hover:text-sky-600 hover:bg-slate-50"
+              }`}
+            >
+              <span>{category.name}</span>
+              <FiChevronDown
+                className={`text-xs ${
+                  isActive ? "text-sky-600" : "text-slate-400"
+                }`}
+              />
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
