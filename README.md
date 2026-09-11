@@ -1,8 +1,8 @@
-# Product Marketplace — Client
+# MegaMart — Client
 
 A modern, responsive storefront and admin dashboard for the Product Marketplace, built with **Next.js**, **TypeScript**, and **HeroUI**. It consumes the [Product Marketplace Server]( https://product-marketplace-server.onrender.com) API for authentication, catalog browsing, reviews, and order management.  
   
-Live Site Link: https://product-marketplace-client.vercel.app/  
+Live Site Link: https://megamaart-client.vercel.app/  
 
   
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
