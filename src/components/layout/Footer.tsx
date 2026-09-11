@@ -43,7 +43,7 @@ export function Footer() {
           {/* Brand column */}
           <div>
             <Link href="/" className="text-2xl font-display font-bold tracking-tight">
-              Ankara
+              MegaMart
             </Link>
             <p className="mt-3 max-w-xs text-sm text-accent-foreground/80">
               A marketplace woven around real stock, real reviews, and real
