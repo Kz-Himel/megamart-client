@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart/CartContext";
 import { ProductCard } from "@/components/products/ProductCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export default function WishlistPage() {
   const { items, totalWishlist, clearWishlist } = useWishlist();
@@ -40,9 +41,11 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="py-2">
+    <div className="py-2 space-y-6">
+      <Breadcrumbs items={[{ label: "My Wishlist" }]} />
+
       {/* Page Header */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
         <div>
           <h1 className="relative inline-block text-xl font-extrabold text-slate-800 sm:text-2xl">
             My <span className="text-[#008ECC]">Wishlist</span>

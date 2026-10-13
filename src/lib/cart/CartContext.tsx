@@ -24,6 +24,8 @@ export interface CartContextType {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  isItemInCart: (productId: string) => boolean;
+  getItemQuantity: (productId: string) => number;
 }
 
 const CART_STORAGE_KEY = "megamart_cart_v1";
@@ -140,6 +142,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, [toast]);
 
+  const isItemInCart = useCallback(
+    (productId: string) => items.some((item) => item.product.id === productId),
+    [items]
+  );
+
+  const getItemQuantity = useCallback(
+    (productId: string) => {
+      const match = items.find((item) => item.product.id === productId);
+      return match ? match.quantity : 0;
+    },
+    [items]
+  );
+
   const totalItems = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity, 0),
     [items]
@@ -159,8 +174,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       updateQuantity,
       clearCart,
+      isItemInCart,
+      getItemQuantity,
     }),
-    [items, totalItems, subtotal, addItem, removeItem, updateQuantity, clearCart]
+    [
+      items,
+      totalItems,
+      subtotal,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      isItemInCart,
+      getItemQuantity,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

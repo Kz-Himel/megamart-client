@@ -16,3 +16,4 @@ export * from "./StatusBadge";
 export * from "./StarRating";
 export * from "./ConfirmDialog";
 export * from "./LoadingSpinner";
+export * from "./Breadcrumbs";

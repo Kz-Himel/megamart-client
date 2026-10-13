@@ -5,15 +5,18 @@ import { useCategories } from "@/hooks/useCategories";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export default function CategoriesPage() {
   const { data: categories, isLoading, isError } = useCategories();
   const visible = categories?.filter((c) => c.status === "ACTIVE") ?? [];
 
   return (
-    <div className="mx-auto max-w-6xl py-4 space-y-6">
+    <div className="mx-auto max-w-6xl py-2 space-y-6">
+      <Breadcrumbs items={[{ label: "Categories" }]} />
+
       {/* Header Section */}
-      <div className="border-b border-slate-100 pb-4">
+      <div className="border-b border-slate-200 pb-4">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Explore Categories</h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-500">
           Browse our wide range of products organized by category

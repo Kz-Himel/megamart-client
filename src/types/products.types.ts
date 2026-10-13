@@ -38,3 +38,13 @@ export interface ProductPayload {
   status?: ProductStatus;
   categoryId: string;
 }
+
+export interface ProductFilterParams {
+  categoryId?: string;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  status?: ProductStatus;
+  sort?: "newest" | "price-asc" | "price-desc" | "name-asc";
+}

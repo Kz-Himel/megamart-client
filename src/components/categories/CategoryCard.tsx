@@ -51,7 +51,7 @@ export function CategoryCard({ category }: { category: Category }) {
 
   return (
     <Link
-      href={`/products?categoryId=${category.id}`}
+      href={`/categories/${category.id}`}
       className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md"
     >
       <div className="flex items-center gap-3.5">

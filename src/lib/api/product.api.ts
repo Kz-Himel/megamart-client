@@ -1,10 +1,10 @@
 import apiClient from "../api/client.api";
 import { ApiResponse } from "@/types/common.types";
-import { Product, ProductPayload } from "../../types/products.types";
+import { Product, ProductPayload, ProductFilterParams } from "../../types/products.types";
 
 export const productApi = {
-  getAll: async () => {
-    const res = await apiClient.get<ApiResponse<Product[]>>("/products");
+  getAll: async (params?: ProductFilterParams) => {
+    const res = await apiClient.get<ApiResponse<Product[]>>("/products", { params });
     return res.data.data;
   },
 
