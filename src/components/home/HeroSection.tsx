@@ -73,6 +73,13 @@ export function HeroSection() {
               <p className="mt-2 text-lg font-bold tracking-widest text-slate-100 sm:text-xl">
                 UP TO 80% OFF
               </p>
+
+              <Link
+                href={`/products/${currentSlide.id}`}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-white transition-all hover:bg-primary-hover shadow-md"
+              >
+                Shop Now
+              </Link>
             </motion.div>
           </AnimatePresence>
 
@@ -111,6 +118,7 @@ export function HeroSection() {
               className="relative z-10 flex h-64 w-64 items-center justify-center md:h-80 md:w-80"
             >
               {currentSlide.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={currentSlide.image}
                   alt={currentSlide.name}

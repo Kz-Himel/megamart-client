@@ -119,7 +119,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 border-t border-accent-foreground/20 pt-6">
           <div className="flex flex-col items-center justify-between gap-3 text-xs text-accent-foreground/70 sm:flex-row">
-            <p>&copy; {new Date().getFullYear()} All rights reserved. Ankara.</p>
+            <p>&copy; {new Date().getFullYear()} All rights reserved. MegaMart.</p>
             <p className="flex items-center gap-1.5">
               Crafted with <FiHeart className="fill-current text-xs" aria-hidden="true" /> by{" "}
               <span className="font-semibold">Himel</span>

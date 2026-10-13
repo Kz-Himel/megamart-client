@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
 import { User, UserRole } from "@/types/auth.types";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 interface UserFormValues {
   name: string;
@@ -45,8 +46,8 @@ export function UserForm({
         role,
         ...(password ? { password } : {}),
       });
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Something went wrong"));
     }
   };
 

@@ -68,7 +68,7 @@ export function CategoriesSection() {
       ) : (
         <div className="mt-8 grid grid-cols-4 gap-4 sm:grid-cols-7 sm:gap-6">
           {featured.map((category) => {
-            const imgUrl = getCategoryImage(category.name, (category as any).image);
+            const imgUrl = getCategoryImage(category.name, category.image ?? undefined);
 
             return (
               <Link
@@ -78,6 +78,7 @@ export function CategoriesSection() {
               >
                 {/* MegaMart Circular Background Card */}
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F5] transition-all duration-300 group-hover:bg-white group-hover:shadow-lg group-hover:scale-105 sm:h-24 sm:w-24">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imgUrl}
                     alt={category.name}

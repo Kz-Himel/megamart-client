@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Category } from "@/types/category.types";
 import { 
   FiArrowRight, 
   FiBox, 
@@ -45,8 +46,8 @@ const getCategoryIcon = (categoryName: string) => {
   return <FiFolder className="text-xl" />;
 };
 
-export function CategoryCard({ category }: { category: any }) {
-  const productCount = category?._count?.products ?? category?.products?.length ?? 0;
+export function CategoryCard({ category }: { category: Category }) {
+  const productCount = category?._count?.products ?? (Array.isArray(category?.products) ? category.products.length : 0);
 
   return (
     <Link

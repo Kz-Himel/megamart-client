@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
 import { Product } from "@/types/products.types";
 import { CreateOrderPayload } from "@/types/order.types";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 interface OrderFormProps {
   products: Product[];
@@ -41,8 +42,8 @@ export function OrderForm({
 
     try {
       await onSubmit({ productId, quantity });
-    } catch (err: any) {
-      setError(err.message || "Could not place order");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Could not place order"));
     }
   };
 

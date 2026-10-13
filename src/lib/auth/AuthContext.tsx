@@ -34,18 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = Cookies.get(USER_COOKIE);
-    const token = Cookies.get(TOKEN_COOKIE);
+    // Read session cookies on mount deferred in microtask to avoid cascading render warning in React 19
+    queueMicrotask(() => {
+      const storedUser = Cookies.get(USER_COOKIE);
+      const token = Cookies.get(TOKEN_COOKIE);
 
-    if (storedUser && token) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        Cookies.remove(USER_COOKIE);
-        Cookies.remove(TOKEN_COOKIE);
+      if (storedUser && token) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          Cookies.remove(USER_COOKIE);
+          Cookies.remove(TOKEN_COOKIE);
+          setUser(null);
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
   }, []);
 
   const login = async (payload: LoginPayload) => {

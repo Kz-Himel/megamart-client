@@ -1,13 +1,21 @@
+import { Skeleton } from "@/components/ui/Skeleton";
+
 export function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-3">
-      <div className="h-44 w-full animate-pulse rounded-xl bg-slate-100" />
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-3 shadow-sm">
+      {/* Image Skeleton */}
+      <Skeleton className="h-44 w-full rounded-xl" />
+
+      {/* Info Skeleton */}
       <div className="flex flex-1 flex-col gap-2 pt-3">
-        <div className="h-3.5 w-3/4 animate-pulse rounded-full bg-slate-100" />
-        <div className="h-2.5 w-1/3 animate-pulse rounded-full bg-slate-100" />
-        <div className="mt-1 h-2.5 w-1/2 animate-pulse rounded-full bg-slate-100" />
-        <div className="mt-2 h-4 w-1/4 animate-pulse rounded-full bg-slate-100" />
-        <div className="mt-3 h-9 w-full animate-pulse rounded-xl bg-slate-100" />
+        <Skeleton className="h-4 w-3/4 rounded-md" />
+        <Skeleton className="h-3 w-1/3 rounded-md" />
+        <div className="mt-1 flex items-center justify-between">
+          <Skeleton className="h-3 w-1/4 rounded-md" />
+          <Skeleton className="h-3 w-1/5 rounded-md" />
+        </div>
+        <Skeleton className="mt-2 h-5 w-1/3 rounded-md" />
+        <Skeleton className="mt-2 h-9 w-full rounded-xl" />
       </div>
     </div>
   );
@@ -15,7 +23,7 @@ export function ProductCardSkeleton() {
 
 export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: count }).map((_, i) => (
         <ProductCardSkeleton key={i} />
       ))}

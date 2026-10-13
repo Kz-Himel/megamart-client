@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@/lib/api/order.api";
-import { CreateOrderPayload, OrderStatus, UpdateOrderPayload } from "@/types/order.types";
+import { CreateOrderPayload, UpdateOrderPayload } from "@/types/order.types";
 
 export const orderKeys = {
   all: ["orders"] as const,

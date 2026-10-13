@@ -16,6 +16,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { Product, ProductPayload, ProductStatus } from "../../types/products.types";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { uploadApi } from "@/lib/api/upload.api";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 interface ProductFormProps {
   initialValues?: Product;
@@ -52,8 +53,8 @@ export function ProductForm({
     try {
       const url = await uploadApi.uploadProductImage(file);
       setImageUrl(url);
-    } catch (err: any) {
-      setUploadError(err.message || "Image upload failed");
+    } catch (err: unknown) {
+      setUploadError(getErrorMessage(err, "Image upload failed"));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -86,8 +87,8 @@ export function ProductForm({
         status,
         categoryId: finalCategoryId,
       });
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Something went wrong"));
     }
   };
 

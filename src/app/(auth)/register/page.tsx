@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 export default function RegisterPage() {
   const { register, login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
@@ -44,8 +45,8 @@ export default function RegisterPage() {
       await register({ name, email, password });
       await login({ email, password });
       router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Registration failed");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Registration failed"));
     } finally {
       setIsSubmitting(false);
     }

@@ -18,7 +18,7 @@ import {
   FiBox,
   FiTag,
   FiGrid,
-  FiMenu,
+  FiHeart,
 } from "react-icons/fi";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -199,6 +199,14 @@ export function Navbar() {
             </Link>
 
             <Link
+              href="/wishlist"
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
+            >
+              <FiHeart className="text-lg text-[#008ECC]" />
+              <span>Wishlist</span>
+            </Link>
+
+            <Link
               href="/cart"
               className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
             >
@@ -345,6 +353,15 @@ export function Navbar() {
                 </Link>
 
                 <Link
+                  href="/wishlist"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
+                >
+                  <FiHeart className="text-lg text-[#008ECC]" />
+                  Wishlist
+                </Link>
+
+                <Link
                   href="/cart"
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
@@ -368,6 +385,7 @@ export function Navbar() {
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
                     >
                       {isAdmin ? <FiGrid className="text-lg text-[#008ECC]" /> : <FiUser className="text-lg text-[#008ECC]" />}
+                      <span>{profileLabel}</span>
                     </Link>
 
                     <button
@@ -378,6 +396,7 @@ export function Navbar() {
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left transition-colors"
                     >
                       <FiLogOut className="text-lg" />
+                      <span>Log out</span>
                     </button>
                   </>
                 ) : (

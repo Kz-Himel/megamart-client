@@ -18,7 +18,7 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message?: string; error?: { details?: any } }>) => {
+  (error: AxiosError<{ message?: string; error?: { details?: unknown } }>) => {
     const message =
       error.response?.data?.message || error.message || "Something went wrong";
 

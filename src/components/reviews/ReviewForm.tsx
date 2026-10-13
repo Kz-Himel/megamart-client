@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FiStar } from "react-icons/fi";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
 import { useCreateReview } from "@/hooks/useReviews";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 export function ReviewForm({ productId }: { productId: string }) {
   const createReview = useCreateReview();
@@ -24,8 +25,8 @@ export function ReviewForm({ productId }: { productId: string }) {
       setSuccess(true);
       e.currentTarget.reset();
       setRating(5);
-    } catch (err: any) {
-      setError(err.message || "Could not submit review");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Could not submit review"));
     }
   };
 

@@ -4,136 +4,142 @@
 
 :root,
 [data-theme="light"] {
-  /* MegaMart reference — hex values sampled directly from the design image,
-     not approximated, so the blue/green match exactly. */
-  --accent: #0090ce;
-  --accent-foreground: #ffffff;
-  --background: #ffffff;
-  --surface: #ffffff;
-  --border: #e7eaee;
-  /* star ratings / review highlights (no equivalent in the reference —
-     kept as a clean amber so it doesn't compete with the primary blue) */
-  --price: #f5a623;
-  --price-foreground: #92400e;
-  /* "Save - ₹X" discount text on product cards */
-  --success: #3b8554;
-  --success-foreground: #1f5b37;
-  /* hero banner background */
-  --navy: #212844;
-  --navy-foreground: #ffffff;
+  /* MegaMart Primary Brand Tokens */
+  --primary: #008ECC;
+  --primary-hover: #0073A8;
+  --primary-light: #EBF6FC;
+  --primary-foreground: #FFFFFF;
+
+  /* Accent & Deal Tokens */
+  --accent: #008ECC;
+  --accent-foreground: #FFFFFF;
+  --deal: #F59E0B;
+  --deal-foreground: #92400E;
+  --deal-light: #FEF3C7;
+
+  /* Price token (distinct, highly legible) */
+  --price: #008ECC;
+  --price-foreground: #0073A8;
+
+  /* Semantic Feedback Tokens */
+  --success: #10B981;
+  --success-foreground: #065F46;
+  --success-light: #ECFDF5;
+  --warning: #F59E0B;
+  --warning-foreground: #92400E;
+  --warning-light: #FEF3C7;
+  --danger: #F43F5E;
+  --danger-foreground: #9F1239;
+  --danger-light: #FFF1F2;
+
+  /* Neutral Background & Surface Tokens */
+  --background: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-secondary: #F8FAFC;
+  --border: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --muted: #64748B;
+  --foreground: #0F172A;
+
+  /* Navy branding for heroes/footers */
+  --navy: #1A2238;
+  --navy-foreground: #FFFFFF;
 }
 
 .dark,
 [data-theme="dark"] {
-  --accent: #38b6e8;
-  --accent-foreground: #04222e;
-  --background: #12151c;
-  --surface: #1a1e27;
-  --border: #2a2f3a;
-  --price: #fbbf54;
-  --price-foreground: #3a2205;
-  --success: #4ade80;
-  --success-foreground: #0b2a15;
-  --navy: #171b2e;
-  --navy-foreground: #ffffff;
+  --primary: #38B6E8;
+  --primary-hover: #50C5F2;
+  --primary-light: #0D2838;
+  --primary-foreground: #04222E;
+
+  --accent: #38B6E8;
+  --accent-foreground: #04222E;
+  --deal: #FBBF54;
+  --deal-foreground: #3A2205;
+  --deal-light: #2D2005;
+
+  --price: #38B6E8;
+  --price-foreground: #FFFFFF;
+
+  --success: #34D399;
+  --success-foreground: #064E3B;
+  --success-light: #06281E;
+  --warning: #FBBF24;
+  --warning-foreground: #78350F;
+  --warning-light: #2D2005;
+  --danger: #FB7185;
+  --danger-foreground: #881337;
+  --danger-light: #300A13;
+
+  --background: #0B0F19;
+  --surface: #131A29;
+  --surface-secondary: #1E293B;
+  --border: #2A364F;
+  --border-subtle: #1C263A;
+  --muted: #94A3B8;
+  --foreground: #F8FAFC;
+
+  --navy: #111728;
+  --navy-foreground: #FFFFFF;
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-deal: var(--deal);
+  --color-deal-foreground: var(--deal-foreground);
+  --color-deal-light: var(--deal-light);
+
   --color-price: var(--price);
   --color-price-foreground: var(--price-foreground);
+
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-light: var(--success-light);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-light: var(--warning-light);
+
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-light: var(--danger-light);
+
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-muted: var(--muted);
   --color-navy: var(--navy);
   --color-navy-foreground: var(--navy-foreground);
-}
 
-@theme inline {
-  --font-display: "Fraunces", serif;
-  --font-sans: "Inter", sans-serif;
+  --font-display: "Poppins", "Inter", sans-serif;
+  --font-sans: "Poppins", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 }
 
-/* signature: thin accent rule under sticky nav */
+/* Thin accent rule under sticky nav */
 .nav-rule {
   background: linear-gradient(
     90deg,
     transparent,
-    var(--accent) 20%,
-    var(--price) 50%,
-    var(--accent) 80%,
+    var(--primary) 20%,
+    var(--deal) 50%,
+    var(--primary) 80%,
     transparent
   );
   height: 2px;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
-/* ---------------------------------------------------------------- */
-/* signature motif: "stitch line" — a running-stitch divider that   */
-/* nods to Ankara wax-print fabric. Used between marketing sections */
-/* instead of a plain border, and echoed in a few small details.    */
-/* ---------------------------------------------------------------- */
-.stitch-divider {
-  position: relative;
-  height: 1px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--border) 0,
-    var(--border) 6px,
-    transparent 6px,
-    transparent 12px
-  );
-}
-.stitch-divider::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, var(--accent), var(--price));
-}
-
-/* seam-stitch used along one edge of a card to read as a fabric swatch */
-.stitch-edge {
-  position: relative;
-}
-.stitch-edge::after {
-  content: "";
-  position: absolute;
-  inset-inline: 14px;
-  bottom: 10px;
-  height: 1px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--accent-foreground) 55%, transparent) 0,
-    color-mix(in oklab, var(--accent-foreground) 55%, transparent) 4px,
-    transparent 4px,
-    transparent 8px
-  );
-  opacity: 0.5;
-}
-
-/* horizontal auto-scrolling strip (category marquee in the hero) */
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-track {
-  animation: marquee-scroll 28s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
-}
-
-/* hide scrollbar on the swipeable product rail, keep it scrollable */
+/* Hide scrollbar on swipeable rails while keeping scrollability */
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -142,14 +148,26 @@
   display: none;
 }
 
+/* Hero background glow */
 .hero-glow {
   background: radial-gradient(
     60% 60% at 70% 30%,
-    color-mix(in oklab, var(--accent) 16%, transparent),
+    color-mix(in oklab, var(--primary) 20%, transparent),
     transparent 70%
   );
 }
+
+/* Dot grid background texture */
 .dot-grid {
   background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
   background-size: 18px 18px;
+}
+
+/* Micro-interaction utilities */
+.card-hover-effect {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 142, 204, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }

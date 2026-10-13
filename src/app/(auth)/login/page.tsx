@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 const DEMO_EMAIL = "demo@ankara.com";
 const DEMO_PASSWORD = "demo1234";
@@ -46,8 +47,8 @@ export default function LoginPage() {
     try {
       const user = await login({ email, password });
       goAfterLogin(user.role);
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Login failed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -59,8 +60,8 @@ export default function LoginPage() {
     try {
       const user = await login({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
       goAfterLogin(user.role);
-    } catch (err: any) {
-      setError(err.message || "Demo account isn't set up yet — try registering instead.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Demo account isn't set up yet — try registering instead."));
     } finally {
       setIsDemoLoading(false);
     }

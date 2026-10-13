@@ -6,6 +6,7 @@ import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react
 import { useAuth } from "@/lib/auth/useAuth";
 import { useUpdateUser } from "@/hooks/useUsers";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { getErrorMessage } from "@/lib/utils/formatters";
 
 export default function AccountProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -33,8 +34,8 @@ export default function AccountProfilePage() {
         ...(password ? { password } : {}),
       });
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Could not update profile");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Could not update profile"));
     }
   };
 

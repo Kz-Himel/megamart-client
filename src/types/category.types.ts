@@ -9,6 +9,10 @@ export interface Category {
   isDeleted?: boolean;
   createdAt: string;
   updatedAt: string;
+  _count?: {
+    products: number;
+  };
+  products?: unknown[];
 }
 
 export interface CategoryPayload {
