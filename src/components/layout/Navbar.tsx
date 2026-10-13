@@ -43,8 +43,8 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const profileHref = isAdmin ? "/dashboard" : "/account/profile";
-  const profileLabel = isAdmin ? "Dashboard" : "My Profile";
+  const profileHref = isAdmin ? "/dashboard" : "/account";
+  const profileLabel = isAdmin ? "Dashboard" : "My Account";
 
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -393,6 +393,15 @@ export function Navbar() {
 
                 {isAuthenticated ? (
                   <>
+                    <Link
+                      href="/orders"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
+                    >
+                      <FiTruck className="text-lg text-[#008ECC]" />
+                      <span>My Orders</span>
+                    </Link>
+
                     <Link
                       href={profileHref}
                       onClick={() => setIsMenuOpen(false)}

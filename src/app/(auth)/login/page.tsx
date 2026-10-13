@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Form, TextField, Label, Input, FieldError, Button } from "@heroui/react";
@@ -15,7 +15,7 @@ import { getErrorMessage } from "@/lib/utils/formatters";
 const DEMO_EMAIL = "demo@ankara.com";
 const DEMO_PASSWORD = "demo1234";
 
-export default function LoginPage() {
+function LoginContent() {
   const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,17 +23,18 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
 
+  const redirectParam = searchParams.get("redirect");
+
   const goAfterLogin = (role: string) => {
-    const redirect = searchParams.get("redirect");
-    router.push(redirect || (role === "ADMIN" ? "/dashboard" : "/"));
+    router.push(redirectParam || (role === "ADMIN" ? "/dashboard" : "/"));
   };
 
   // Already signed in — no reason to show the login form.
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
-      router.replace(searchParams.get("redirect") || "/");
+      router.replace(redirectParam || "/");
     }
-  }, [isAuthLoading, isAuthenticated, router, searchParams]);
+  }, [isAuthLoading, isAuthenticated, router, redirectParam]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,70 +68,85 @@ export default function LoginPage() {
     }
   };
 
+  if (isAuthLoading || isAuthenticated) {
+    return <LoadingSpinner label="Redirecting..." />;
+  }
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-sm">
+      {/* Header */}
+      <div className="mb-4 text-center">
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
+        <p className="mt-0.5 text-xs text-slate-500">Log in to continue to MegaMart</p>
+      </div>
+
+      {/* Content Body */}
+      <div className="space-y-3">
+        <GoogleButton />
+        <AuthDivider label="or continue with email" />
+
+        <Form onSubmit={handleSubmit} className="w-full space-y-2.5">
+          <TextField name="email" type="email" isRequired fullWidth>
+            <Label className="text-xs font-semibold text-slate-700">Email</Label>
+            <Input placeholder="you@example.com" fullWidth />
+            <FieldError className="text-[10px] text-red-500" />
+          </TextField>
+
+          <PasswordField name="password" label="Password" placeholder="••••••••" isRequired minLength={1} />
+
+          {error && (
+            <p className="flex items-start gap-1 rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-600">
+              <FiAlertCircle className="mt-0.5 shrink-0 text-sm" />
+              {error}
+            </p>
+          )}
+
+          <Button 
+            type="submit" 
+            className="mt-1 h-9 w-full rounded-full bg-[#008ECC] text-xs font-semibold text-white hover:bg-[#0073A8] active:scale-95" 
+            isDisabled={isSubmitting}
+          >
+            <FiLogIn className="mr-1 text-sm" />
+            {isSubmitting ? "Logging in..." : "Log in"}
+          </Button>
+        </Form>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="h-8 w-full rounded-full border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          onPress={handleDemoLogin}
+          isDisabled={isDemoLoading}
+        >
+          <FiZap className="mr-1 text-amber-500" />
+          {isDemoLoading ? "Signing in..." : "Try demo login"}
+        </Button>
+
+        {/* Footer */}
+        <p className="pt-1 text-center text-xs text-slate-500">
+          Don&apos;t have an account?{" "}
+          <Link
+            href={
+              redirectParam
+                ? `/register?redirect=${encodeURIComponent(redirectParam)}`
+                : "/register"
+            }
+            className="font-semibold text-[#008ECC] hover:underline"
+          >
+            Register
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div className="flex h-[80vh] w-full items-center justify-center overflow-hidden">
-      {isAuthLoading || isAuthenticated ? (
-        <LoadingSpinner label="Redirecting..." />
-      ) : (
-        <div className="w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-sm">
-        {/* Header */}
-        <div className="mb-4 text-center">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-          <p className="mt-0.5 text-xs text-slate-500">Log in to continue to the marketplace</p>
-        </div>
-
-        {/* Content Body */}
-        <div className="space-y-3">
-          <GoogleButton />
-          <AuthDivider label="or continue with email" />
-
-          <Form onSubmit={handleSubmit} className="w-full space-y-2.5">
-            <TextField name="email" type="email" isRequired fullWidth>
-              <Label className="text-xs font-semibold text-slate-700">Email</Label>
-              <Input placeholder="you@example.com" fullWidth />
-              <FieldError className="text-[10px] text-red-500" />
-            </TextField>
-
-            <PasswordField name="password" label="Password" placeholder="••••••••" isRequired minLength={1} />
-
-            {error && (
-              <p className="flex items-start gap-1 rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-600">
-                <FiAlertCircle className="mt-0.5 shrink-0 text-sm" />
-                {error}
-              </p>
-            )}
-
-            <Button 
-              type="submit" 
-              className="mt-1 h-9 w-full rounded-full bg-accent text-xs font-semibold text-accent-foreground hover:opacity-90 active:scale-95" 
-              isDisabled={isSubmitting}
-            >
-              <FiLogIn className="mr-1 text-sm" />
-              {isSubmitting ? "Logging in..." : "Log in"}
-            </Button>
-          </Form>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="h-8 w-full rounded-full border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-            onPress={handleDemoLogin}
-            isDisabled={isDemoLoading}
-          >
-            <FiZap className="mr-1 text-amber-500" />
-            {isDemoLoading ? "Signing in..." : "Try demo login"}
-          </Button>
-
-          {/* Footer */}
-          <p className="pt-1 text-center text-xs text-slate-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-accent hover:underline">
-              Register
-            </Link>
-          </p>
-        </div>
-        </div>
-      )}
+      <Suspense fallback={<LoadingSpinner label="Loading..." />}>
+        <LoginContent />
+      </Suspense>
     </div>
   );
 }

@@ -109,9 +109,13 @@ export function OrderTable({
                           Product #{order.productId.slice(0, 8)}
                         </span>
                       )}
-                      <p className="text-[11px] font-mono text-slate-400">
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="text-[11px] font-mono text-slate-400 hover:text-[#008ECC] hover:underline"
+                        title="View order details"
+                      >
                         Ref: {order.id.slice(0, 13)}
-                      </p>
+                      </Link>
                     </div>
                   </div>
                 </td>
@@ -171,7 +175,14 @@ export function OrderTable({
 
                 {/* Actions */}
                 <td className="px-5 py-4 text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className="rounded-xl px-2.5 py-1 text-xs font-bold text-[#008ECC] hover:bg-[#008ECC]/10 transition-colors"
+                      title="View order details"
+                    >
+                      Details
+                    </Link>
                     {!isAdmin && order.status === "PENDING" && onCancel && (
                       <Button
                         size="sm"

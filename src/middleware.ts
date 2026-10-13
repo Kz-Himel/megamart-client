@@ -4,7 +4,7 @@ const ADMIN_PREFIX = "/dashboard";
 const PROTECTED_PREFIXES = ["/dashboard", "/orders", "/account"];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
 
   if (!token || !userCookie) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
+    loginUrl.searchParams.set("redirect", `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 

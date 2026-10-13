@@ -19,6 +19,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   login: (payload: LoginPayload) => Promise<AuthUser>;
   register: (payload: RegisterPayload) => Promise<void>;
+  updateUserSession: (updatedUser: Partial<AuthUser>) => void;
   logout: () => void;
 }
 
@@ -68,6 +69,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authApi.register(payload);
   };
 
+  const updateUserSession = (updatedFields: Partial<AuthUser>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const merged = { ...prev, ...updatedFields };
+      Cookies.set(USER_COOKIE, JSON.stringify(merged), {
+        expires: COOKIE_EXPIRY_DAYS,
+      });
+      return merged;
+    });
+  };
+
   const logout = () => {
     Cookies.remove(TOKEN_COOKIE);
     Cookies.remove(USER_COOKIE);
@@ -84,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: user?.role === "ADMIN",
         login,
         register,
+        updateUserSession,
         logout,
       }}
     >

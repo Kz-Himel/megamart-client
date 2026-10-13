@@ -151,14 +151,24 @@ export function OrderConfirmation({ result }: OrderConfirmationProps) {
                   <p className="font-bold text-slate-800 line-clamp-1">
                     {order.product?.name ?? "MegaMart Product"}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-mono">
-                    Qty: {order.quantity} × {formatCurrency(order.product?.price ?? 0)}
-                  </p>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Qty: {order.quantity} × {formatCurrency(order.product?.price ?? 0)}
+                    </span>
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className="text-[11px] font-bold text-[#008ECC] hover:underline"
+                    >
+                      View Order Details →
+                    </Link>
+                  </div>
                 </div>
               </div>
 
-              <div className="font-extrabold text-slate-900 font-mono">
-                {formatCurrency(order.totalPrice)}
+              <div className="text-right">
+                <span className="font-extrabold text-slate-900 font-mono">
+                  {formatCurrency(order.totalPrice)}
+                </span>
               </div>
             </div>
           ))}

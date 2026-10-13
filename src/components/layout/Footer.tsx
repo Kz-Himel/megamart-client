@@ -37,7 +37,7 @@ export function Footer() {
     ...(isAuthenticated
       ? [
           {
-            href: isAdmin ? "/dashboard" : "/account/profile",
+            href: isAdmin ? "/dashboard" : "/account",
             label: isAdmin ? "Admin Dashboard" : "My Account",
           },
           { href: "/orders", label: "Order History" },
