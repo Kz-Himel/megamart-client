@@ -2,7 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@/lib/api/order.api";
-import { CreateOrderPayload, UpdateOrderPayload } from "@/types/order.types";
+import {
+  CreateOrderPayload,
+  UpdateOrderPayload,
+  CheckoutPayload,
+} from "@/types/order.types";
 
 export const orderKeys = {
   all: ["orders"] as const,
@@ -22,6 +26,16 @@ export function useOrder(id: string) {
     queryKey: orderKeys.detail(id),
     queryFn: () => orderApi.getById(id),
     enabled: !!id,
+  });
+}
+
+export function useCheckoutOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CheckoutPayload) => orderApi.checkout(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+    },
   });
 }
 

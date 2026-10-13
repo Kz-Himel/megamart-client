@@ -4,6 +4,8 @@ import {
   Order,
   CreateOrderPayload,
   UpdateOrderPayload,
+  CheckoutPayload,
+  CheckoutResult,
 } from "@/types/order.types";
 
 export const orderApi = {
@@ -14,6 +16,14 @@ export const orderApi = {
 
   getById: async (id: string) => {
     const res = await apiClient.get<ApiResponse<Order>>(`/orders/${id}`);
+    return res.data.data;
+  },
+
+  checkout: async (payload: CheckoutPayload) => {
+    const res = await apiClient.post<ApiResponse<CheckoutResult>>(
+      "/orders/checkout",
+      payload
+    );
     return res.data.data;
   },
 

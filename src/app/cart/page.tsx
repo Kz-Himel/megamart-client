@@ -69,11 +69,10 @@ export default function CartPage() {
     );
   }
 
-  // Target link for checkout: if cart has items, pre-populate first product for existing order flow
-  const firstItem = items[0];
-  const checkoutHref = firstItem
-    ? `/orders/new?productId=${firstItem.product.id}&quantity=${firstItem.quantity}`
-    : "/orders/new";
+  // Target link for checkout: points to complete checkout flow with all cart items
+  const checkoutHref = promoCode.trim()
+    ? `/orders/new?fromCart=true&promo=${encodeURIComponent(promoCode.trim().toUpperCase())}`
+    : "/orders/new?fromCart=true";
 
   return (
     <div className="py-2 space-y-6">
