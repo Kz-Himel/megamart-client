@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FiImage, FiStar, FiArrowRight, FiHeart } from "react-icons/fi";
+import { FiImage, FiStar, FiHeart, FiShoppingCart } from "react-icons/fi";
 import { Product } from "../../types/products.types";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils/cn";
+import { useCart } from "@/lib/cart/CartContext";
+import { useWishlist } from "@/lib/wishlist/WishlistContext";
 
 export interface ProductCardProps {
   product: Product;
@@ -19,9 +21,15 @@ export function ProductCard({
   product,
   onQuickAdd,
   onToggleWishlist,
-  isWishlisted = false,
+  isWishlisted: isWishlistedProp,
   className,
 }: ProductCardProps) {
+  const { addItem } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const isWishlisted =
+    isWishlistedProp !== undefined ? isWishlistedProp : isInWishlist(product.id);
+
   const reviews = product.reviews ?? [];
   const reviewCount = reviews.length;
   const rating =
@@ -34,13 +42,22 @@ export function ProductCard({
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onToggleWishlist) onToggleWishlist(product);
+    if (onToggleWishlist) {
+      onToggleWishlist(product);
+    } else {
+      toggleWishlist(product);
+    }
   };
 
   const handleQuickAddClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onQuickAdd) onQuickAdd(product);
+    if (isOutOfStock) return;
+    if (onQuickAdd) {
+      onQuickAdd(product);
+    } else {
+      addItem(product, 1);
+    }
   };
 
   return (
@@ -59,7 +76,7 @@ export function ProductCard({
           <img
             src={product.image}
             alt={product.name}
-            className="h-full w-full object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-108"
+            className="h-full w-full object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-slate-300">
@@ -90,14 +107,14 @@ export function ProductCard({
           onClick={handleWishlistClick}
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           className={cn(
-            "absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all",
+            "absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm backdrop-blur-sm transition-all",
             "hover:scale-110 active:scale-95",
             isWishlisted
               ? "text-rose-500 hover:text-rose-600"
               : "text-slate-400 hover:text-rose-500"
           )}
         >
-          <FiHeart className={cn("text-sm", isWishlisted && "fill-current")} />
+          <FiHeart className={cn("text-sm", isWishlisted && "fill-rose-500 text-rose-500")} />
         </button>
       </div>
 
@@ -133,18 +150,18 @@ export function ProductCard({
 
         {/* Action Button: Quick Add or View Details */}
         <div className="mt-3">
-          {onQuickAdd && !isOutOfStock ? (
+          {!isOutOfStock ? (
             <button
               type="button"
               onClick={handleQuickAddClick}
               className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2 text-xs font-bold text-slate-800 transition-all hover:bg-[#008ECC] hover:text-white active:scale-98"
             >
-              Add to Cart
+              <FiShoppingCart className="text-xs" />
+              <span>Add to Cart</span>
             </button>
           ) : (
-            <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/60 py-2 text-xs font-semibold text-slate-600 transition-all group-hover:border-[#008ECC] group-hover:bg-[#008ECC] group-hover:text-white">
-              <span>View Details</span>
-              <FiArrowRight className="text-xs transition-transform duration-200 group-hover:translate-x-1" />
+            <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/60 py-2 text-xs font-semibold text-slate-400">
+              <span>Out of Stock</span>
             </div>
           )}
         </div>

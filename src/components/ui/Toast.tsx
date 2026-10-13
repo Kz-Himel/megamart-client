@@ -14,8 +14,16 @@ export interface ToastMessage {
   description?: string;
 }
 
-interface ToastContextValue {
+export interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: ToastType;
+  type?: ToastType;
+}
+
+export interface ToastContextValue {
   showToast: (props: { type: ToastType; title: string; description?: string }) => void;
+  toast: (options: ToastOptions) => void;
   success: (title: string, description?: string) => void;
   error: (title: string, description?: string) => void;
   info: (title: string, description?: string) => void;
@@ -74,9 +82,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     (title: string, description?: string) => showToast({ type: "warning", title, description }),
     [showToast]
   );
+  const toast = useCallback(
+    ({ title, description, variant, type }: ToastOptions) => {
+      const resolvedType = variant || type || "info";
+      showToast({ type: resolvedType, title, description });
+    },
+    [showToast]
+  );
 
   return (
-    <ToastContext.Provider value={{ showToast, success, error, info, warning }}>
+    <ToastContext.Provider value={{ showToast, toast, success, error, info, warning }}>
       {children}
       {/* Toast Notification Container */}
       <div

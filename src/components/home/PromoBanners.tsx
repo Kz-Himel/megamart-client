@@ -38,10 +38,10 @@ export function PromoBanners() {
               New Arrival
             </span>
             <h3 className="mt-1 text-xl font-extrabold sm:text-2xl">
-              Trendy Fashion Essentials
+              High-Fidelity Audio Gear
             </h3>
             <p className="mt-1 text-xs text-slate-300">
-              Explore the fresh collection today.
+              Experience wireless sound and crystal clarity.
             </p>
             <Link
               href="/products"

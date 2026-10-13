@@ -39,7 +39,30 @@ export function HeroSection() {
     return () => clearInterval(timer);
   }, [hasSlides, slides.length, isPaused]);
 
-  if (!hasSlides) return null;
+  if (!hasSlides) {
+    return (
+      <section className="relative w-full overflow-hidden rounded-3xl bg-[#1A2238] px-8 py-12 sm:px-14 sm:py-16 text-white shadow-xl">
+        <div className="relative z-10 max-w-xl">
+          <span className="inline-block rounded-full bg-sky-500/20 px-3.5 py-1 text-xs font-semibold text-sky-300">
+            Welcome to MegaMart
+          </span>
+          <h1 className="mt-3 text-3xl font-extrabold uppercase tracking-tight text-white sm:text-4xl md:text-5xl">
+            Verified Products, Direct Deals
+          </h1>
+          <p className="mt-2 text-sm text-slate-300 sm:text-base">
+            Discover electronics, premium accessories, everyday essentials, and exclusive promotions.
+          </p>
+          <Link
+            href="/products"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#008ECC] px-6 py-2.5 text-xs font-bold text-white transition-all hover:bg-[#0073A8] shadow-lg"
+          >
+            Explore Catalog
+          </Link>
+        </div>
+        <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
+      </section>
+    );
+  }
 
   const currentSlide = slides[currentIndex];
 

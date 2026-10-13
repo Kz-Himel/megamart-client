@@ -66,18 +66,19 @@ export function CategoriesSection() {
           ))}
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-4 gap-4 sm:grid-cols-7 sm:gap-6">
+        <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-8">
           {featured.map((category) => {
             const imgUrl = getCategoryImage(category.name, category.image ?? undefined);
+            const count = category._count?.products;
 
             return (
               <Link
                 key={category.id}
                 href={`/products?categoryId=${category.id}`}
-                className="group flex flex-col items-center gap-3 text-center"
+                className="group flex flex-col items-center gap-2.5 text-center min-w-[90px] sm:min-w-[105px]"
               >
                 {/* MegaMart Circular Background Card */}
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F5] transition-all duration-300 group-hover:bg-white group-hover:shadow-lg group-hover:scale-105 sm:h-24 sm:w-24">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#F5F5F5] transition-all duration-300 group-hover:bg-white group-hover:shadow-lg group-hover:scale-105 sm:h-24 sm:w-24 border border-slate-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imgUrl}
@@ -86,10 +87,17 @@ export function CategoriesSection() {
                   />
                 </div>
 
-                {/* Category Title */}
-                <span className="truncate max-w-[100px] text-xs font-semibold text-slate-700 group-hover:text-sky-600 transition-colors sm:text-sm">
-                  {category.name}
-                </span>
+                {/* Category Title & Count */}
+                <div className="flex flex-col items-center">
+                  <span className="truncate max-w-[110px] text-xs font-bold text-slate-800 group-hover:text-[#008ECC] transition-colors sm:text-sm">
+                    {category.name}
+                  </span>
+                  {count !== undefined && (
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {count} {count === 1 ? "product" : "products"}
+                    </span>
+                  )}
+                </div>
               </Link>
             );
           })}

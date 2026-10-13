@@ -22,7 +22,8 @@ import {
 } from "react-icons/fi";
 import { PiTextAlignLeftBold } from "react-icons/pi";
 import { useAuth } from "@/lib/auth/useAuth";
-import { useOrders } from "@/hooks/useOrders";
+import { useCart } from "@/lib/cart/CartContext";
+import { useWishlist } from "@/lib/wishlist/WishlistContext";
 
 function initials(name?: string) {
   if (!name) return "U";
@@ -36,13 +37,12 @@ function initials(name?: string) {
 
 export function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { totalItems: cartCount } = useCart();
+  const { totalWishlist: wishlistCount } = useWishlist();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const { data: orders } = useOrders({ enabled: isAuthenticated });
-
-  const orderCount = isAuthenticated ? orders?.length ?? 0 : 0;
   const profileHref = isAdmin ? "/dashboard" : "/account/profile";
   const profileLabel = isAdmin ? "Dashboard" : "My Profile";
 
@@ -202,7 +202,14 @@ export function Navbar() {
               href="/wishlist"
               className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
             >
-              <FiHeart className="text-lg text-[#008ECC]" />
+              <div className="relative flex items-center">
+                <FiHeart className="text-xl text-[#008ECC]" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </div>
               <span>Wishlist</span>
             </Link>
 
@@ -212,9 +219,9 @@ export function Navbar() {
             >
               <div className="relative flex items-center">
                 <FiShoppingCart className="text-xl text-[#008ECC]" aria-hidden="true" />
-                {orderCount > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#008ECC] text-[10px] font-bold text-white">
-                    {orderCount}
+                    {cartCount}
                   </span>
                 )}
               </div>
@@ -355,10 +362,17 @@ export function Navbar() {
                 <Link
                   href="/wishlist"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-[#F3F9FB] hover:text-[#008ECC]"
                 >
-                  <FiHeart className="text-lg text-[#008ECC]" />
-                  Wishlist
+                  <div className="flex items-center gap-3">
+                    <FiHeart className="text-lg text-[#008ECC]" />
+                    <span>Wishlist</span>
+                  </div>
+                  {wishlistCount > 0 && (
+                    <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs text-white">
+                      {wishlistCount}
+                    </span>
+                  )}
                 </Link>
 
                 <Link
@@ -370,9 +384,9 @@ export function Navbar() {
                     <FiShoppingCart className="text-lg text-[#008ECC]" />
                     <span>Cart</span>
                   </div>
-                  {orderCount > 0 && (
+                  {cartCount > 0 && (
                     <span className="rounded-full bg-[#008ECC] px-2 py-0.5 text-xs text-white">
-                      {orderCount}
+                      {cartCount}
                     </span>
                   )}
                 </Link>

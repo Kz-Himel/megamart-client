@@ -16,13 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light" data-theme="light">
+    <html lang="en" className="light" data-theme="light" suppressHydrationWarning>
       <body
-        className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} bg-background font-sans text-foreground antialiased`}
+        className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} flex min-h-screen flex-col bg-background font-sans text-foreground antialiased`}
+        suppressHydrationWarning
       >
         <Providers>
           <Navbar />
-          <main className="mx-auto min-h-[70vh] max-w-7xl px-4 py-10">
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
             {children}
           </main>
           <Footer />

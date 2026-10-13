@@ -27,9 +27,9 @@ export function FeaturedProducts() {
       {/* MegaMart Section Header */}
       <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-3">
         <h2 className="relative text-base sm:text-lg font-bold text-slate-800">
-          Grab the best deal on <span className="text-sky-600">Smartphones</span>
+          Grab the best deals on <span className="text-[#008ECC]">Featured Products</span>
           {/* Active bottom line matching MegaMart UI */}
-          <span className="absolute -bottom-[13px] left-0 h-[3px] w-full bg-sky-500 rounded-full" />
+          <span className="absolute -bottom-[13px] left-0 h-[3px] w-full bg-[#008ECC] rounded-full" />
         </h2>
 
         <div className="flex items-center gap-3">

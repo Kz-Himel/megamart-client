@@ -12,12 +12,11 @@ import { useProducts } from "@/hooks/useProducts";
 export function PopularPicks() {
   const { data: products, isLoading } = useProducts();
 
-  // A different slice than FeaturedProducts (offset by 5) so the two rows
-  // don't just repeat the same cards.
-  const picks = [...(products ?? [])]
-    .filter((p) => p.status === "ACTIVE")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(5, 11);
+  const allActive = (products ?? []).filter((p) => p.status === "ACTIVE");
+  const picks =
+    allActive.length > 5
+      ? allActive.slice(5, 11)
+      : [...allActive].sort((a, b) => a.price - b.price).slice(0, 6);
 
   if (!isLoading && picks.length === 0) return null;
 
