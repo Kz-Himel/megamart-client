@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_PREFIX = "/dashboard";
-const PROTECTED_PREFIXES = ["/dashboard", "/orders", "/account"];
+const PROTECTED_PREFIXES = ["/dashboard", "/orders", "/account", "/seller/dashboard"];
 
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -24,7 +24,10 @@ export function middleware(request: NextRequest) {
     try {
       const user = JSON.parse(userCookie);
       if (user.role !== "ADMIN") {
-        return NextResponse.redirect(new URL("/", request.url));
+        if (user.role === "SELLER") {
+          return NextResponse.redirect(new URL("/seller/dashboard", request.url));
+        }
+        return NextResponse.redirect(new URL("/account", request.url));
       }
     } catch {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -35,5 +38,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/orders/:path*", "/account/:path*"],
+  matcher: ["/dashboard/:path*", "/orders/:path*", "/account/:path*", "/seller/dashboard/:path*"],
 };

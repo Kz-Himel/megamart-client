@@ -15,4 +15,16 @@ export const uploadApi = {
     );
     return res.data.data.url;
   },
+
+  uploadDocument: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("document", file);
+
+    const res = await apiClient.post<ApiResponse<{ url: string }>>(
+      "/uploads/document",
+      formData,
+      { headers: { "Content-Type": undefined } }
+    );
+    return res.data.data.url;
+  },
 };

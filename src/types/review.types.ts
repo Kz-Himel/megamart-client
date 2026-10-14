@@ -8,7 +8,7 @@ export interface Review {
   userId: string;
   productId: string;
   user?: { id: string; name: string };
-  product?: { id: string; name: string };
+  product?: { id: string; name: string; image?: string | null };
   isDeleted?: boolean;
   createdAt: string;
   updatedAt: string;

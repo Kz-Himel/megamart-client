@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   FiBox,
@@ -16,6 +15,9 @@ import {
   FiTrendingUp,
   FiCheckCircle,
   FiClock,
+  FiArrowRight,
+  FiAlertCircle,
+  FiShield,
 } from "react-icons/fi";
 import {
   AreaChart,
@@ -37,9 +39,16 @@ import { useCategories } from "@/hooks/useCategories";
 import { useOrders } from "@/hooks/useOrders";
 import { useReviews } from "@/hooks/useReviews";
 import { useUsers } from "@/hooks/useUsers";
+import { useAdminSellers } from "@/hooks/useAdmin";
+import { useAdminPayouts } from "@/hooks/useAdmin";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardMetricCard } from "@/components/dashboard/DashboardMetricCard";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
 import { OrderStatus } from "@/types/order.types";
+import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: "#f59e0b",
@@ -49,77 +58,23 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   CANCELLED: "#f43f5e",
 };
 
-const SKY_BLUE = "#008ECC";
-
-function MetricCard({
-  icon,
-  label,
-  value,
-  trend,
-  index,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  trend: string;
-  index: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F0F8FF] text-[#008ECC] text-lg">
-          {icon}
-        </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
-          <FiTrendingUp className="w-3 h-3" />
-          {trend}
-        </span>
-      </div>
-      <p className="text-2xl font-bold tracking-tight text-slate-900">{value}</p>
-      <p className="mt-1 text-xs font-medium text-slate-500">{label}</p>
-    </motion.div>
-  );
-}
-
-function SectionCard({
-  title,
-  subtitle,
-  action,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-bold text-slate-900">{title}</h2>
-          {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
-        </div>
-        {action}
-      </div>
-      {children}
-    </div>
-  );
-}
-
 export default function DashboardOverviewPage() {
   const { data: products, isLoading: loadingProducts } = useProducts();
   const { data: categories, isLoading: loadingCategories } = useCategories();
   const { data: orders, isLoading: loadingOrders } = useOrders();
   const { data: reviews, isLoading: loadingReviews } = useReviews();
   const { data: users, isLoading: loadingUsers } = useUsers();
+  const { data: sellers, isLoading: loadingSellers } = useAdminSellers();
+  const { data: payouts, isLoading: loadingPayouts } = useAdminPayouts();
 
   const isLoading =
-    loadingProducts || loadingCategories || loadingOrders || loadingReviews || loadingUsers;
+    loadingProducts ||
+    loadingCategories ||
+    loadingOrders ||
+    loadingReviews ||
+    loadingUsers ||
+    loadingSellers ||
+    loadingPayouts;
 
   const activeOrders = useMemo(
     () => (orders ?? []).filter((o) => o.status !== "CANCELLED"),
@@ -131,9 +86,23 @@ export default function DashboardOverviewPage() {
     [activeOrders]
   );
 
+  const approvedSellersCount = useMemo(
+    () => (sellers ?? []).filter((s) => s.status === "APPROVED").length,
+    [sellers]
+  );
+
+  const pendingSellers = useMemo(
+    () => (sellers ?? []).filter((s) => s.status === "PENDING" || s.status === "UNDER_REVIEW"),
+    [sellers]
+  );
+
+  const pendingPayouts = useMemo(
+    () => (payouts ?? []).filter((p) => p.status === "PENDING"),
+    [payouts]
+  );
+
   // Revenue trend / Sales by day or month
   const salesByMonth = useMemo(() => {
-    // Generate monthly sales bars matching Board 9 mockup
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const monthlyData = months.map((m) => ({ month: m, sales: 0, orders: 0 }));
 
@@ -146,25 +115,9 @@ export default function DashboardOverviewPage() {
       }
     }
 
-    // If data is concentrated in current month, synthesize realistic relative baseline for clean visualization
-    const hasData = monthlyData.some((m) => m.sales > 0);
-    if (!hasData) {
-      return [
-        { month: "Jan", sales: 2400 },
-        { month: "Feb", sales: 1398 },
-        { month: "Mar", sales: 9800 },
-        { month: "Apr", sales: 3908 },
-        { month: "May", sales: 4800 },
-        { month: "Jun", sales: 3800 },
-        { month: "Jul", sales: 4300 },
-        { month: "Aug", sales: 5400 },
-        { month: "Sep", sales: 6100 },
-        { month: "Oct", sales: Number(totalRevenue.toFixed(2)) || 7200 },
-      ];
-    }
-
-    return monthlyData.slice(0, new Date().getMonth() + 1);
-  }, [activeOrders, orders, totalRevenue]);
+    const currentMonthIdx = new Date().getMonth();
+    return monthlyData.slice(0, currentMonthIdx + 1);
+  }, [activeOrders, orders]);
 
   const statusBreakdown = useMemo(() => {
     const counts: Record<OrderStatus, number> = {
@@ -180,276 +133,236 @@ export default function DashboardOverviewPage() {
       .filter((s) => s.count > 0);
   }, [orders]);
 
-  const topProducts = useMemo(() => {
-    const revenueByProduct = new Map<string, { name: string; revenue: number; count: number }>();
-    for (const order of activeOrders) {
-      const key = order.productId;
-      const name = order.product?.name ?? "Product item";
-      const existing = revenueByProduct.get(key);
-      revenueByProduct.set(key, {
-        name,
-        revenue: (existing?.revenue ?? 0) + order.totalPrice,
-        count: (existing?.count ?? 0) + order.quantity,
-      });
-    }
-    return Array.from(revenueByProduct.values())
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5)
-      .map((p) => ({ ...p, revenue: Number(p.revenue.toFixed(2)) }));
-  }, [activeOrders]);
-
   const recentOrders = useMemo(() => {
-    return (orders ?? []).slice(0, 6);
+    return (orders ?? []).slice(0, 5);
   }, [orders]);
 
-  if (isLoading) return <LoadingSpinner label="Loading dashboard metrics..." />;
+  if (isLoading) return <LoadingSpinner label="Loading platform metrics..." />;
 
   const userCount = users?.length ?? 0;
   const orderCount = orders?.length ?? 0;
 
   return (
     <div className="space-y-8">
-      {/* Top Banner / Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#EBF5FC] px-2.5 py-0.5 text-xs font-bold text-[#008ECC]">
-              MegaMart Admin
-            </span>
-            <span className="text-xs text-slate-400">• Real-Time Analytics</span>
+      {/* Platform Header */}
+      <DashboardHeader
+        badge="Super Admin Console"
+        title="Platform Oversight & Analytics"
+        subtitle="Live administrative metrics across multi-vendor marketplace catalog, orders, and settlements."
+        breadcrumbs={[{ label: "Admin Console" }]}
+        actions={
+          <div className="flex items-center gap-2.5">
+            <Link href="/dashboard/sellers">
+              <Button
+                variant="primary"
+                size="sm"
+                className="rounded-xl font-bold bg-[#008ECC] text-white shadow-xs"
+              >
+                <FiBriefcase className="mr-1.5" /> Review Sellers ({pendingSellers.length})
+              </Button>
+            </Link>
+            <Link href="/dashboard/payouts">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="rounded-xl font-bold border-slate-200"
+              >
+                <FiDollarSign className="mr-1 text-emerald-600" /> Payouts ({pendingPayouts.length})
+              </Button>
+            </Link>
           </div>
-          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-slate-900">
-            Platform Overview
-          </h1>
-          <p className="text-xs text-slate-500">
-            Monitor sales, marketplace activity, and vendor performance in one centralized hub.
-          </p>
-        </div>
+        }
+      />
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 shadow-sm">
-            <FiCalendar className="w-3.5 h-3.5 text-[#008ECC]" />
-            <span>This Month</span>
-          </div>
-          <Link
-            href="/dashboard/sellers"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#008ECC] text-white text-xs font-semibold shadow-sm hover:bg-[#007BB5] transition"
-          >
-            <FiBriefcase className="w-3.5 h-3.5" />
-            <span>Review Sellers</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 4 Primary Metric Cards (Matching Board 9) */}
+      {/* 4 Primary Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          icon={<FiUsers />}
-          label="Total Registered Users"
-          value={userCount > 0 ? userCount.toLocaleString() : "5,432"}
-          trend="+12%"
+        <DashboardMetricCard
           index={0}
-        />
-        <MetricCard
-          icon={<FiBriefcase />}
-          label="Verified Sellers & Stores"
-          value="124"
-          trend="+8%"
-          index={1}
-        />
-        <MetricCard
-          icon={<FiShoppingCart />}
-          label="Total Customer Orders"
-          value={orderCount > 0 ? orderCount.toLocaleString() : "8,921"}
-          trend="+24%"
-          index={2}
-        />
-        <MetricCard
           icon={<FiDollarSign />}
           label="Gross Platform Revenue"
-          value={totalRevenue > 0 ? `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "$48,250"}
-          trend="+18%"
+          value={formatCurrency(totalRevenue)}
+          trend="Server Verified"
+          trendUp={true}
+          subtitle={`${orderCount} orders recorded`}
+        />
+        <DashboardMetricCard
+          index={1}
+          icon={<FiBriefcase />}
+          label="Verified Sellers"
+          value={approvedSellersCount}
+          trend={pendingSellers.length > 0 ? `${pendingSellers.length} pending review` : "All reviewed"}
+          trendUp={pendingSellers.length === 0}
+          subtitle={`Total: ${sellers?.length ?? 0} applications`}
+        />
+        <DashboardMetricCard
+          index={2}
+          icon={<FiShoppingCart />}
+          label="Total Orders"
+          value={orderCount}
+          subtitle={`${activeOrders.length} active / completed`}
+        />
+        <DashboardMetricCard
           index={3}
+          icon={<FiUsers />}
+          label="Registered Users"
+          value={userCount}
+          trend={`${products?.length ?? 0} products active`}
+          trendUp={true}
         />
       </div>
 
-      {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sales Overview Bar Chart (Board 9 Style) */}
-        <div className="lg:col-span-2">
-          <SectionCard
-            title="Sales Overview"
-            subtitle="Monthly gross marketplace revenue and volume"
-            action={
-              <span className="text-xs font-semibold text-[#008ECC] bg-[#F0F8FF] px-2.5 py-1 rounded-full">
-                2026 Yearly Trend
-              </span>
-            }
-          >
-            <div className="h-[280px] w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salesByMonth} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 12, fill: "#64748b" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "#64748b" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={45}
-                    tickFormatter={(v) => `$${v}`}
-                  />
-                  <Tooltip
-                    formatter={(value) => [`$${Number(value).toLocaleString()}`, "Sales"]}
-                    contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-                  />
-                  <Bar
-                    dataKey="sales"
-                    fill={SKY_BLUE}
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={38}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+      {/* Pending Sellers Alert Banner (if any) */}
+      {pendingSellers.length > 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 text-lg font-bold">
+              <FiClock />
             </div>
-          </SectionCard>
+            <div>
+              <p className="text-xs font-bold text-amber-950">
+                {pendingSellers.length} Seller Application{pendingSellers.length > 1 ? "s" : ""} Awaiting Compliance Decision
+              </p>
+              <p className="text-[11px] text-amber-800">
+                Review applicant identity documents, business credentials, and approve store handles.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/sellers">
+            <Button size="sm" variant="primary" className="rounded-xl font-bold bg-amber-600 hover:bg-amber-700 text-white text-xs">
+              Open Seller Queue
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sales Overview Bar Chart */}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Gross Sales Overview</h3>
+              <p className="text-xs text-slate-400">Monthly gross marketplace revenue and volume</p>
+            </div>
+            <span className="text-xs font-bold text-[#008ECC] bg-[#F0F8FF] px-2.5 py-1 rounded-full border border-sky-100">
+              Live DB Records
+            </span>
+          </div>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salesByMonth} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                <Tooltip formatter={(value: any) => [`$${value}`, "Sales"]} />
+                <Bar dataKey="sales" fill="#008ECC" radius={[6, 6, 0, 0]} maxBarSize={45} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Order Status Breakdown */}
-        <div className="lg:col-span-1">
-          <SectionCard title="Order Status" subtitle="Fulfillment pipeline breakdown">
-            {statusBreakdown.length === 0 ? (
-              <EmptyState icon={<FiShoppingCart />} title="No orders to display" />
-            ) : (
-              <div className="h-[280px] w-full flex flex-col justify-center items-center">
-                <ResponsiveContainer width="100%" height={200}>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-bold text-slate-900">Order Status Breakdown</h3>
+            <p className="text-xs text-slate-400">Fulfillment lifecycle distribution</p>
+          </div>
+
+          {statusBreakdown.length === 0 ? (
+            <p className="text-xs text-slate-400 py-12 text-center">No orders recorded in database.</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="h-44 w-full">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={statusBreakdown}
-                      dataKey="count"
-                      nameKey="status"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={3}
-                    >
+                    <Pie data={statusBreakdown} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={42} outerRadius={68} paddingAngle={4}>
                       {statusBreakdown.map((entry) => (
-                        <Cell key={entry.status} fill={STATUS_COLORS[entry.status]} />
+                        <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#cbd5e1"} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
+                    <Tooltip formatter={(value: any, name: any) => [value, name]} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap justify-center gap-3 text-xs mt-2">
-                  {statusBreakdown.map((entry) => (
-                    <div key={entry.status} className="flex items-center gap-1.5">
-                      <div
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: STATUS_COLORS[entry.status] }}
-                      />
-                      <span className="text-slate-600 font-medium">
-                        {entry.status}: <strong className="text-slate-900">{entry.count}</strong>
-                      </span>
-                    </div>
-                  ))}
-                </div>
               </div>
-            )}
-          </SectionCard>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {statusBreakdown.map((item) => (
+                  <div key={item.status} className="flex items-center gap-2 p-1.5 rounded-lg bg-slate-50">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: STATUS_COLORS[item.status] }} />
+                    <span className="text-[11px] font-semibold text-slate-600 truncate">{item.status}:</span>
+                    <span className="text-[11px] font-black text-slate-900">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom Grid: Recent Activities & Top Products */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders / Activity Feed */}
-        <SectionCard
-          title="Recent Orders"
-          subtitle="Latest transactions processed through the marketplace"
-          action={
-            <Link
-              href="/dashboard/orders"
-              className="text-xs font-semibold text-[#008ECC] hover:underline flex items-center gap-1"
-            >
-              View all <FiArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          }
-        >
-          {recentOrders.length === 0 ? (
-            <EmptyState icon={<FiShoppingCart />} title="No recent orders" />
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="py-3 flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
-                      #{order.id.slice(0, 4)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 line-clamp-1">
-                        {order.product?.name ?? "Marketplace Order"}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Qty: {order.quantity} • {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-slate-900">${order.totalPrice.toFixed(2)}</p>
-                    <span
-                      className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                        order.status === "DELIVERED"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : order.status === "CONFIRMED"
-                          ? "bg-[#EBF5FC] text-[#008ECC]"
-                          : "bg-amber-50 text-amber-600"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
+      {/* Recent Orders Overview */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">Recent Platform Transactions</h3>
+            <p className="text-xs text-slate-400">Latest multi-vendor order activity across all stores.</p>
+          </div>
+          <Link href="/dashboard/orders" className="text-xs font-bold text-[#008ECC] hover:underline flex items-center gap-1">
+            <span>View All Orders</span>
+            <FiArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
 
-        {/* Top Performing Products */}
-        <SectionCard
-          title="Top Products by Revenue"
-          subtitle="Highest grossing catalog items"
-          action={
-            <Link
-              href="/dashboard/products"
-              className="text-xs font-semibold text-[#008ECC] hover:underline flex items-center gap-1"
-            >
-              Catalog <FiArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          }
-        >
-          {topProducts.length === 0 ? (
-            <EmptyState icon={<FiBox />} title="No sales data recorded" />
-          ) : (
-            <div className="space-y-4">
-              {topProducts.map((p, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-[#F0F8FF]/50 transition">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#008ECC]/10 text-[#008ECC] flex items-center justify-center font-bold text-xs">
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900 line-clamp-1">{p.name}</p>
-                      <p className="text-xs text-slate-400">{p.count} units sold</p>
-                    </div>
-                  </div>
-                  <p className="text-sm font-bold text-slate-900">${p.revenue.toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
+        {recentOrders.length === 0 ? (
+          <EmptyState icon={<FiShoppingCart className="text-3xl text-slate-300" />} title="No Platform Orders" description="Transactions placed by customers will populate this table in real-time." />
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#F8FAFC] border-b border-slate-200/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th className="py-3 px-4">Order Ref</th>
+                  <th className="py-3 px-4">Customer</th>
+                  <th className="py-3 px-4">Product Item</th>
+                  <th className="py-3 px-4">Gross Total</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {recentOrders.map((ord: any) => (
+                  <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                      #{ord.id.slice(0, 8)}
+                      <p className="text-[10px] text-slate-400 font-sans font-normal">{formatDate(ord.createdAt)}</p>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">
+                      <p className="font-semibold text-slate-800">{ord.user?.name ?? "Customer"}</p>
+                      <p className="text-[10px] text-slate-400">{ord.user?.email}</p>
+                    </td>
+                    <td className="py-3 px-4">
+                      <p className="font-bold text-slate-900 line-clamp-1">{ord.product?.name ?? "Item"}</p>
+                      <p className="text-[10px] text-slate-400">Qty: {ord.quantity}</p>
+                    </td>
+                    <td className="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
+                      {formatCurrency(ord.totalPrice)}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <StatusBadge status={ord.status} size="sm" />
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <Link
+                        href={`/orders/${ord.id}`}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#008ECC] hover:underline"
+                      >
+                        Inspect <FiArrowRight className="h-3 w-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

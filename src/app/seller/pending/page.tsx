@@ -32,14 +32,20 @@ export default function SellerPendingPage() {
           Your seller account is under review. We&apos;ll notify you once it&apos;s approved by our admin team.
         </p>
 
-        {/* Action Button: Back to Home */}
-        <div className="mt-8 w-full max-w-xs">
+        {/* Action Buttons */}
+        <div className="mt-8 w-full max-w-xs flex flex-col gap-2">
           <Link
-            href="/"
+            href="/seller/dashboard"
             className="flex w-full items-center justify-center gap-2 rounded-full bg-[#008ECC] py-3.5 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-[#0073A8] transition-all active:scale-98"
           >
+            <span>View Application Details</span>
+          </Link>
+          <Link
+            href="/"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 py-3 text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all"
+          >
             <FiHome className="text-base" />
-            <span>Back to Home</span>
+            <span>Back to Storefront</span>
           </Link>
         </div>
       </div>

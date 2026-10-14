@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   FiBriefcase,
   FiSearch,
@@ -14,396 +14,462 @@ import {
   FiPhone,
   FiMapPin,
   FiFilter,
+  FiShield,
+  FiExternalLink,
+  FiDollarSign,
+  FiFileText,
 } from "react-icons/fi";
+import { useAdminSellers, useUpdateSellerStatus, useUpdateSellerCommission } from "@/hooks/useAdmin";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { DecisionModal, DecisionType } from "@/components/dashboard/DecisionModal";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
-
-interface SellerApplication {
-  id: string;
-  storeName: string;
-  category: string;
-  ownerName: string;
-  email: string;
-  phone: string;
-  city: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  submittedAt: string;
-  description: string;
-}
-
-const DEFAULT_APPLICATIONS: SellerApplication[] = [
-  {
-    id: "app-101",
-    storeName: "Apex Audio Gear",
-    category: "Electronics",
-    ownerName: "Marcus Vance",
-    email: "marcus@apexaudio.com",
-    phone: "+1 (555) 382-9012",
-    city: "Austin, TX",
-    status: "PENDING",
-    submittedAt: "2026-10-12T14:30:00Z",
-    description: "Specialized in audiophile-grade studio headphones, wireless DACs, and high-fidelity sound monitors.",
-  },
-  {
-    id: "app-102",
-    storeName: "Urban Threads Collective",
-    category: "Fashion",
-    ownerName: "Elena Rostova",
-    email: "elena@urbanthreads.io",
-    phone: "+1 (555) 749-1120",
-    city: "Seattle, WA",
-    status: "APPROVED",
-    submittedAt: "2026-10-08T09:15:00Z",
-    description: "Sustainable streetwear and organic minimalist apparel made with recycled textiles.",
-  },
-  {
-    id: "app-103",
-    storeName: "Zenith Home Essentials",
-    category: "Home & Living",
-    ownerName: "Devon Clark",
-    email: "d.clark@zenithliving.com",
-    phone: "+1 (555) 602-8841",
-    city: "Denver, CO",
-    status: "APPROVED",
-    submittedAt: "2026-10-05T18:40:00Z",
-    description: "Nordic furniture, ergonomic work-from-home standing desks, and ambient smart lighting.",
-  },
-  {
-    id: "app-104",
-    storeName: "BioGlow Skincare Co.",
-    category: "Beauty & Health",
-    ownerName: "Chloe Nguyen",
-    email: "chloe@bioglow.shop",
-    phone: "+1 (555) 914-3320",
-    city: "San Francisco, CA",
-    status: "PENDING",
-    submittedAt: "2026-10-14T08:20:00Z",
-    description: "Dermatologist-tested, cruelty-free botanical serums and mineral sunscreen.",
-  },
-  {
-    id: "app-105",
-    storeName: "TurboGadget Liquidators",
-    category: "Electronics",
-    ownerName: "Gavin Ross",
-    email: "gavin@turbogadget.biz",
-    phone: "+1 (555) 123-9999",
-    city: "Miami, FL",
-    status: "REJECTED",
-    submittedAt: "2026-09-28T11:00:00Z",
-    description: "Bulk refurbished mobile accessories with inconsistent supplier provenance.",
-  },
-];
+import { useToast } from "@/components/ui/Toast";
+import { Store, StoreStatus } from "@/types/seller.types";
+import { formatDate, formatCurrency } from "@/lib/utils/formatters";
 
 export default function AdminSellersPage() {
-  const [applications, setApplications] = useState<SellerApplication[]>(DEFAULT_APPLICATIONS);
-  const [filter, setFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("ALL");
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
-  const [selectedApp, setSelectedApp] = useState<SellerApplication | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
-  useEffect(() => {
-    // Check if user submitted an application via /seller/apply
-    try {
-      const stored = localStorage.getItem("megamart_seller_app");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setApplications((prev) => {
-          if (prev.some((p) => p.email === parsed.email || p.storeName === parsed.storeName)) {
-            return prev;
-          }
-          return [
-            {
-              id: "app-" + Date.now(),
-              storeName: parsed.storeName || "New Merchant Store",
-              category: parsed.category || "General",
-              ownerName: parsed.ownerName || "Merchant Applicant",
-              email: parsed.email || "applicant@example.com",
-              phone: parsed.phone || "N/A",
-              city: parsed.city || "Online",
-              status: "PENDING",
-              submittedAt: new Date().toISOString(),
-              description: parsed.description || "Vendor registration through onboarding portal.",
-            },
-            ...prev,
-          ];
-        });
-      }
-    } catch {
-      // ignore
+  // Decision Modal State
+  const [decisionModalOpen, setDecisionModalOpen] = useState(false);
+  const [decisionType, setDecisionType] = useState<DecisionType>("APPROVE");
+  const [targetStore, setTargetStore] = useState<Store | null>(null);
+
+  // Commission Edit State
+  const [isEditingCommission, setIsEditingCommission] = useState(false);
+  const [newCommissionRate, setNewCommissionRate] = useState("10");
+
+  // Backend queries & mutations
+  const { data: sellers, isLoading, refetch } = useAdminSellers(filter === "ALL" ? undefined : filter);
+  const updateStatus = useUpdateSellerStatus();
+  const updateCommission = useUpdateSellerCommission();
+
+  const filteredStores = useMemo(() => {
+    return (sellers ?? []).filter((s) => {
+      const q = search.toLowerCase();
+      const matchSearch =
+        s.name.toLowerCase().includes(q) ||
+        s.slug.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        (s.user?.name ?? "").toLowerCase().includes(q);
+      return matchSearch;
+    });
+  }, [sellers, search]);
+
+  const handleOpenDecision = (store: Store, type: DecisionType) => {
+    setTargetStore(store);
+    setDecisionType(type);
+    setDecisionModalOpen(true);
+  };
+
+  const handleConfirmDecision = async (reason: string) => {
+    if (!targetStore) return;
+
+    let targetStatus: StoreStatus;
+    switch (decisionType) {
+      case "APPROVE":
+        targetStatus = "APPROVED";
+        break;
+      case "CHANGES_REQUESTED":
+        targetStatus = "CHANGES_REQUESTED";
+        break;
+      case "SUSPEND":
+        targetStatus = "SUSPENDED";
+        break;
+      case "REJECT":
+      default:
+        targetStatus = "REJECTED";
+        break;
     }
-  }, []);
 
-  const updateStatus = (id: string, newStatus: "APPROVED" | "REJECTED") => {
-    setApplications((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-    );
-    if (selectedApp?.id === id) {
-      setSelectedApp((curr) => (curr ? { ...curr, status: newStatus } : null));
+    try {
+      await updateStatus.mutateAsync({
+        id: targetStore.id,
+        payload: {
+          status: targetStatus,
+          reason: reason || undefined,
+        },
+      });
+
+      toast({
+        title: "Store Status Updated",
+        description: `Store "${targetStore.name}" is now ${targetStatus}.`,
+        variant: "success",
+      });
+
+      setDecisionModalOpen(false);
+      if (selectedStore?.id === targetStore.id) {
+        setSelectedStore((prev) => (prev ? { ...prev, status: targetStatus, adminFeedback: reason } : null));
+      }
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Update Failed",
+        description: err.message || "Could not update seller status.",
+        variant: "error",
+      });
     }
   };
 
-  const filtered = applications.filter((app) => {
-    const matchesFilter = filter === "ALL" || app.status === filter;
-    const matchesSearch =
-      app.storeName.toLowerCase().includes(search.toLowerCase()) ||
-      app.ownerName.toLowerCase().includes(search.toLowerCase()) ||
-      app.email.toLowerCase().includes(search.toLowerCase()) ||
-      app.category.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const handleSaveCommission = async () => {
+    if (!selectedStore) return;
+    const rate = parseFloat(newCommissionRate) / 100;
+    if (isNaN(rate) || rate < 0 || rate > 0.5) {
+      toast({ title: "Invalid Rate", description: "Commission must be between 0% and 50%.", variant: "error" });
+      return;
+    }
 
-  const pendingCount = applications.filter((a) => a.status === "PENDING").length;
+    try {
+      await updateCommission.mutateAsync({
+        id: selectedStore.id,
+        commissionRate: rate,
+      });
+      setSelectedStore({ ...selectedStore, commissionRate: rate });
+      setIsEditingCommission(false);
+      toast({ title: "Commission Updated", description: `Commission set to ${(rate * 100).toFixed(0)}%.`, variant: "success" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Could not update commission.", variant: "error" });
+    }
+  };
+
+  const pendingCount = (sellers ?? []).filter((s) => s.status === "PENDING" || s.status === "UNDER_REVIEW").length;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#EBF5FC] px-2.5 py-0.5 text-xs font-bold text-[#008ECC]">
-              Vendor Management
-            </span>
-            <span className="text-xs text-slate-400">• Multi-Vendor Verification</span>
-          </div>
-          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-slate-900">
-            Sellers & Store Approvals
-          </h1>
-          <p className="text-xs text-slate-500">
-            Review onboarding applications, verify merchant credentials, and manage active store status.
-          </p>
-        </div>
+      <DashboardHeader
+        badge="Platform Compliance"
+        title="Seller Management & Applications"
+        subtitle="Review new merchant credentials, moderate store catalogs, manage commissions, and enforce compliance."
+        breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Sellers" }]}
+      />
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200/60">
-            <FiClock className="w-3.5 h-3.5" />
-            <span>{pendingCount} Pending Reviews</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
-          {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map((tab) => (
+      {/* Filter Tabs & Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          {[
+            { key: "ALL", label: "All Sellers" },
+            { key: "PENDING", label: `Pending Reviews ${pendingCount > 0 ? `(${pendingCount})` : ""}` },
+            { key: "APPROVED", label: "Approved" },
+            { key: "CHANGES_REQUESTED", label: "Changes Requested" },
+            { key: "SUSPENDED", label: "Suspended" },
+            { key: "REJECTED", label: "Rejected" },
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                filter === tab
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900"
+              key={tab.key}
+              type="button"
+              onClick={() => setFilter(tab.key)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${
+                filter === tab.key
+                  ? "bg-[#008ECC] text-white shadow-xs"
+                  : "text-slate-600 hover:bg-[#F0F8FF] hover:text-[#008ECC]"
               }`}
             >
-              {tab === "ALL" ? "All Sellers" : tab.charAt(0) + tab.slice(1).toLowerCase()}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <div className="relative max-w-xs">
+          <FiSearch className="absolute left-3 top-2.5 text-slate-400 text-xs" />
           <input
             type="text"
-            placeholder="Search store, owner or email..."
+            placeholder="Search stores or owners..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] transition"
+            className="w-full rounded-xl border border-slate-200 pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
           />
         </div>
       </div>
 
-      {/* Applications Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="overflow-x-auto">
+      {isLoading ? (
+        <div className="py-20 flex justify-center">
+          <LoadingSpinner label="Loading seller accounts..." />
+        </div>
+      ) : filteredStores.length === 0 ? (
+        <EmptyState
+          icon={<FiBriefcase className="text-4xl text-slate-300" />}
+          title="No Sellers Found"
+          description={filter === "PENDING" ? "There are no pending seller applications awaiting review." : "No store records match the current filter."}
+        />
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8FAFC] text-slate-500 border-b border-slate-200/80 font-bold uppercase tracking-wider">
+            <thead className="bg-[#F8FAFC] border-b border-slate-200/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
               <tr>
-                <th className="px-5 py-3.5">Store & Category</th>
-                <th className="px-5 py-3.5">Owner / Contact</th>
-                <th className="px-5 py-3.5">City</th>
-                <th className="px-5 py-3.5">Submitted</th>
-                <th className="px-5 py-3.5">Status</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="py-3 px-4">Store & Handle</th>
+                <th className="py-3 px-4">Owner Contact</th>
+                <th className="py-3 px-4">Category</th>
+                <th className="py-3 px-4">Commission</th>
+                <th className="py-3 px-4">Balance</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
-                    No vendor applications found matching criteria.
+              {filteredStores.map((s) => (
+                <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3 px-4">
+                    <p className="font-bold text-slate-900 line-clamp-1">{s.name}</p>
+                    <p className="font-mono text-[10px] text-[#008ECC]">@{s.slug}</p>
+                  </td>
+                  <td className="py-3 px-4 text-slate-600">
+                    <p className="font-semibold text-slate-800">{s.user?.name ?? s.email}</p>
+                    <p className="text-[10px] text-slate-400">{s.phone} • {s.city}</p>
+                  </td>
+                  <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
+                    {s.category}
+                  </td>
+                  <td className="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">
+                    {(s.commissionRate * 100).toFixed(0)}%
+                  </td>
+                  <td className="py-3 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                    {formatCurrency(s.balance)}
+                  </td>
+                  <td className="py-3 px-4 whitespace-nowrap">
+                    <StatusBadge status={s.status} size="sm" />
+                  </td>
+                  <td className="py-3 px-4 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedStore(s);
+                          setNewCommissionRate((s.commissionRate * 100).toString());
+                        }}
+                        className="rounded-xl text-[11px] font-bold"
+                      >
+                        <FiEye className="mr-1" /> Review
+                      </Button>
+
+                      {s.status === "PENDING" && (
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleOpenDecision(s, "APPROVE")}
+                          className="rounded-xl text-[11px] font-bold bg-emerald-600 text-white hover:bg-emerald-700"
+                        >
+                          Approve
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                filtered.map((app) => (
-                  <tr key={app.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#EBF5FC] text-[#008ECC] font-bold flex items-center justify-center text-xs">
-                          {app.storeName.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{app.storeName}</p>
-                          <span className="inline-block mt-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                            {app.category}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <p className="font-semibold text-slate-900">{app.ownerName}</p>
-                      <p className="text-slate-400 text-[11px]">{app.email}</p>
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600 font-medium">
-                      {app.city}
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-400 font-mono text-[11px]">
-                      {new Date(app.submittedAt).toLocaleDateString()}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                          app.status === "APPROVED"
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50"
-                            : app.status === "PENDING"
-                            ? "bg-amber-50 text-amber-700 border border-amber-200/50"
-                            : "bg-rose-50 text-rose-600 border border-rose-200/50"
-                        }`}
-                      >
-                        {app.status === "APPROVED" && <FiCheckCircle className="w-3 h-3" />}
-                        {app.status === "PENDING" && <FiClock className="w-3 h-3" />}
-                        {app.status === "REJECTED" && <FiXCircle className="w-3 h-3" />}
-                        {app.status}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setSelectedApp(app)}
-                          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition"
-                          title="View Application"
-                        >
-                          <FiEye className="w-3.5 h-3.5" />
-                        </button>
-                        {app.status === "PENDING" && (
-                          <>
-                            <button
-                              onClick={() => updateStatus(app.id, "APPROVED")}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-[11px] hover:bg-emerald-700 transition"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => updateStatus(app.id, "REJECTED")}
-                              className="px-2.5 py-1 rounded-lg border border-rose-200 text-rose-600 font-bold text-[11px] hover:bg-rose-50 transition"
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        {app.status === "APPROVED" && (
-                          <button
-                            onClick={() => updateStatus(app.id, "REJECTED")}
-                            className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] font-semibold hover:bg-rose-50 hover:text-rose-600 transition"
-                          >
-                            Suspend
-                          </button>
-                        )}
-                        {app.status === "REJECTED" && (
-                          <button
-                            onClick={() => updateStatus(app.id, "APPROVED")}
-                            className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] font-semibold hover:bg-emerald-50 hover:text-emerald-600 transition"
-                          >
-                            Re-approve
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      {/* Details Modal */}
-      {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-100"
-          >
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+      {/* ========================================================================= */}
+      {/* DETAILED APPLICATION REVIEW DRAWER / MODAL */}
+      {/* ========================================================================= */}
+      {selectedStore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{selectedApp.storeName}</h3>
-                <p className="text-xs text-slate-500">Applicant: {selectedApp.ownerName}</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#008ECC]">Store Dossier</span>
+                <h3 className="text-xl font-black text-slate-900">{selectedStore.name}</h3>
               </div>
               <button
-                onClick={() => setSelectedApp(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                type="button"
+                onClick={() => setSelectedStore(null)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-4 space-y-3 text-xs">
-              <div>
-                <span className="font-bold text-slate-500">Store Category</span>
-                <p className="text-slate-900 font-semibold">{selectedApp.category}</p>
+            {/* Quick Status Bar */}
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-700">Status:</span>
+                <StatusBadge status={selectedStore.status} />
+              </div>
+              <span className="text-slate-400 font-mono">Handle: @{selectedStore.slug}</span>
+            </div>
+
+            {/* Verification Documents & Identity Card */}
+            <div className="rounded-xl border border-sky-200 bg-[#F0F8FF]/50 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <FiFileText className="text-[#008ECC]" /> Business Verification Document
+                </span>
+                {selectedStore.verificationDoc ? (
+                  <a
+                    href={selectedStore.verificationDoc}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#008ECC] hover:underline"
+                  >
+                    <span>Inspect Document</span>
+                    <FiExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <span className="text-xs text-slate-400 italic">No document attached</span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Tax ID / Registration: <span className="font-bold text-slate-800">{selectedStore.taxId || "Not supplied"}</span>
+              </p>
+            </div>
+
+            {/* Detailed Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="rounded-xl border border-slate-100 p-3.5 bg-slate-50/50 space-y-1.5">
+                <p className="font-bold text-slate-900">Owner Credentials</p>
+                <p className="text-slate-600">Name: <span className="font-semibold text-slate-800">{selectedStore.user?.name ?? "—"}</span></p>
+                <p className="text-slate-600">Email: <span className="font-semibold text-slate-800">{selectedStore.user?.email ?? selectedStore.email}</span></p>
+                <p className="text-slate-600">Phone: <span className="font-semibold text-slate-800">{selectedStore.phone}</span></p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <span className="font-bold text-slate-500">Email</span>
-                  <p className="text-slate-900 font-medium">{selectedApp.email}</p>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-500">Phone</span>
-                  <p className="text-slate-900 font-medium">{selectedApp.phone}</p>
-                </div>
-              </div>
-
-              <div>
-                <span className="font-bold text-slate-500">Business Location</span>
-                <p className="text-slate-900 font-medium">{selectedApp.city}</p>
-              </div>
-
-              <div>
-                <span className="font-bold text-slate-500">Store Pitch & Catalog Description</span>
-                <p className="mt-1 rounded-xl bg-slate-50 p-3 text-slate-700 leading-relaxed">
-                  {selectedApp.description}
-                </p>
+              <div className="rounded-xl border border-slate-100 p-3.5 bg-slate-50/50 space-y-1.5">
+                <p className="font-bold text-slate-900">Registered Business Address</p>
+                <p className="text-slate-600">{selectedStore.address}</p>
+                <p className="text-slate-600">{selectedStore.city}, {selectedStore.country}</p>
+                <p className="text-slate-400 text-[10px]">Submitted: {formatDate(selectedStore.createdAt)}</p>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
-              <Button size="sm" variant="outline" onClick={() => setSelectedApp(null)}>
-                Close
-              </Button>
-              {selectedApp.status !== "APPROVED" && (
-                <Button
-                  size="sm"
-                  className="bg-emerald-600 text-white font-bold hover:bg-emerald-700"
-                  onClick={() => updateStatus(selectedApp.id, "APPROVED")}
-                >
-                  Approve Application
-                </Button>
-              )}
-              {selectedApp.status === "APPROVED" && (
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => updateStatus(selectedApp.id, "REJECTED")}
-                >
-                  Suspend Store
+            {/* Description */}
+            <div className="rounded-xl border border-slate-100 p-3.5 bg-white text-xs space-y-1">
+              <p className="font-bold text-slate-900">Store Description</p>
+              <p className="text-slate-600 leading-relaxed">{selectedStore.description}</p>
+            </div>
+
+            {/* Commission Settings */}
+            <div className="rounded-xl border border-slate-200 p-3.5 bg-slate-50 flex items-center justify-between text-xs">
+              <div>
+                <p className="font-bold text-slate-900">Platform Commission Rate</p>
+                <p className="text-[11px] text-slate-500">Currently taking {(selectedStore.commissionRate * 100).toFixed(0)}% from sales</p>
+              </div>
+
+              {isEditingCommission ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={newCommissionRate}
+                    onChange={(e) => setNewCommissionRate(e.target.value)}
+                    className="w-16 rounded-lg border border-slate-300 p-1 text-center font-bold text-xs"
+                  />
+                  <span className="font-bold">%</span>
+                  <Button size="sm" variant="primary" onClick={handleSaveCommission} className="rounded-lg text-xs py-1 px-2.5">
+                    Save
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={() => setIsEditingCommission(true)} className="rounded-lg text-xs">
+                  Change Rate
                 </Button>
               )}
             </div>
-          </motion.div>
+
+            {/* Audit Feedback / Notes */}
+            {selectedStore.adminFeedback && (
+              <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+                <span className="font-bold">Latest Administrator Feedback: </span>
+                <span>{selectedStore.adminFeedback}</span>
+              </div>
+            )}
+
+            {/* Decision Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex items-center gap-2">
+                {selectedStore.status !== "APPROVED" && (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleOpenDecision(selectedStore, "APPROVE")}
+                    className="rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700"
+                  >
+                    <FiCheckCircle className="mr-1.5" /> Approve Store
+                  </Button>
+                )}
+
+                {selectedStore.status !== "CHANGES_REQUESTED" && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleOpenDecision(selectedStore, "CHANGES_REQUESTED")}
+                    className="rounded-xl font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border-amber-200"
+                  >
+                    <FiClock className="mr-1.5" /> Request Changes
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {selectedStore.status !== "SUSPENDED" && selectedStore.status === "APPROVED" && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleOpenDecision(selectedStore, "SUSPEND")}
+                    className="rounded-xl font-bold"
+                  >
+                    <FiShield className="mr-1.5" /> Suspend
+                  </Button>
+                )}
+
+                {selectedStore.status !== "REJECTED" && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleOpenDecision(selectedStore, "REJECT")}
+                    className="rounded-xl font-bold bg-rose-600 text-white"
+                  >
+                    <FiXCircle className="mr-1.5" /> Reject
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Decision Confirmation Modal with reason feedback input */}
+      {targetStore && (
+        <DecisionModal
+          isOpen={decisionModalOpen}
+          onClose={() => setDecisionModalOpen(false)}
+          title={
+            decisionType === "APPROVE"
+              ? "Approve Seller Store"
+              : decisionType === "CHANGES_REQUESTED"
+              ? "Request Application Changes"
+              : decisionType === "SUSPEND"
+              ? "Suspend Merchant Store"
+              : "Reject Seller Application"
+          }
+          description={
+            decisionType === "APPROVE"
+              ? "Approving this store grants the user the SELLER role and unlocks their merchant workspace."
+              : decisionType === "CHANGES_REQUESTED"
+              ? "Specify the corrections or documents required before re-submission."
+              : decisionType === "SUSPEND"
+              ? "Suspending this store will immediately hide all their products and block merchant actions."
+              : "State the reason for rejecting this merchant registration."
+          }
+          targetName={`${targetStore.name} (@${targetStore.slug})`}
+          decisionType={decisionType}
+          requiresReason={decisionType !== "APPROVE"}
+          onConfirm={handleConfirmDecision}
+          isSubmitting={updateStatus.isPending}
+        />
       )}
     </div>
   );
