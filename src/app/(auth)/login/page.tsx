@@ -8,8 +8,7 @@ import { FiLogIn, FiAlertCircle, FiZap } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { PasswordField } from "@/components/auth/PasswordField";
-import { GoogleButton } from "@/components/auth/GoogleButton";
-import { AuthDivider } from "@/components/auth/AuthDivider";
+import { SplitAuthCard } from "@/components/auth/SplitAuthCard";
 import { getErrorMessage } from "@/lib/utils/formatters";
 
 const DEMO_EMAIL = "demo@ankara.com";
@@ -29,7 +28,6 @@ function LoginContent() {
     router.push(redirectParam || (role === "ADMIN" ? "/dashboard" : "/"));
   };
 
-  // Already signed in — no reason to show the login form.
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
       router.replace(redirectParam || "/");
@@ -69,81 +67,84 @@ function LoginContent() {
   };
 
   if (isAuthLoading || isAuthenticated) {
-    return <LoadingSpinner label="Redirecting..." />;
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <LoadingSpinner label="Redirecting to your account..." />
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-sm">
-      {/* Header */}
-      <div className="mb-4 text-center">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-        <p className="mt-0.5 text-xs text-slate-500">Log in to continue to MegaMart</p>
-      </div>
+    <SplitAuthCard
+      mode="login"
+      title="Sign In to MegaMart"
+      subtitle="Enter your details below to continue"
+      redirectParam={redirectParam}
+    >
+      <Form onSubmit={handleSubmit} className="w-full space-y-3.5">
+        <TextField name="email" type="email" isRequired fullWidth>
+          <Label className="text-xs font-bold text-slate-700">Email or Phone</Label>
+          <Input
+            placeholder="Enter your email or phone"
+            className="rounded-xl border border-slate-200 bg-[#F8FAFC] py-2 px-3 text-xs outline-none focus:border-[#008ECC] focus:bg-white transition-colors"
+            fullWidth
+          />
+          <FieldError className="text-[10px] text-red-500" />
+        </TextField>
 
-      {/* Content Body */}
-      <div className="space-y-3">
-        <GoogleButton />
-        <AuthDivider label="or continue with email" />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-xs font-bold text-slate-700">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-semibold text-[#008ECC] hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <PasswordField
+            name="password"
+            label=""
+            placeholder="Enter your password"
+            isRequired
+            minLength={1}
+          />
+        </div>
 
-        <Form onSubmit={handleSubmit} className="w-full space-y-2.5">
-          <TextField name="email" type="email" isRequired fullWidth>
-            <Label className="text-xs font-semibold text-slate-700">Email</Label>
-            <Input placeholder="you@example.com" fullWidth />
-            <FieldError className="text-[10px] text-red-500" />
-          </TextField>
+        {error && (
+          <p className="flex items-start gap-1.5 rounded-xl border border-red-100 bg-red-50 p-2.5 text-xs text-red-600">
+            <FiAlertCircle className="mt-0.5 shrink-0 text-sm" />
+            <span>{error}</span>
+          </p>
+        )}
 
-          <PasswordField name="password" label="Password" placeholder="••••••••" isRequired minLength={1} />
-
-          {error && (
-            <p className="flex items-start gap-1 rounded-md border border-red-100 bg-red-50 p-2 text-xs text-red-600">
-              <FiAlertCircle className="mt-0.5 shrink-0 text-sm" />
-              {error}
-            </p>
-          )}
-
-          <Button 
-            type="submit" 
-            className="mt-1 h-9 w-full rounded-full bg-[#008ECC] text-xs font-semibold text-white hover:bg-[#0073A8] active:scale-95" 
-            isDisabled={isSubmitting}
-          >
-            <FiLogIn className="mr-1 text-sm" />
-            {isSubmitting ? "Logging in..." : "Log in"}
-          </Button>
-        </Form>
+        <Button
+          type="submit"
+          className="mt-2 h-10 w-full rounded-full bg-[#008ECC] text-xs font-bold text-white shadow-xs hover:bg-[#0073A8] transition-all active:scale-98"
+          isDisabled={isSubmitting}
+        >
+          <FiLogIn className="mr-1.5 text-sm" />
+          {isSubmitting ? "Signing in..." : "Login"}
+        </Button>
 
         <Button
           type="button"
           variant="outline"
-          className="h-8 w-full rounded-full border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          className="h-9 w-full rounded-full border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all"
           onPress={handleDemoLogin}
           isDisabled={isDemoLoading}
         >
-          <FiZap className="mr-1 text-amber-500" />
-          {isDemoLoading ? "Signing in..." : "Try demo login"}
+          <FiZap className="mr-1.5 text-amber-500" />
+          {isDemoLoading ? "Signing in..." : "Try demo account"}
         </Button>
-
-        {/* Footer */}
-        <p className="pt-1 text-center text-xs text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link
-            href={
-              redirectParam
-                ? `/register?redirect=${encodeURIComponent(redirectParam)}`
-                : "/register"
-            }
-            className="font-semibold text-[#008ECC] hover:underline"
-          >
-            Register
-          </Link>
-        </p>
-      </div>
-    </div>
+      </Form>
+    </SplitAuthCard>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="flex h-[80vh] w-full items-center justify-center overflow-hidden">
+    <div className="flex min-h-[75vh] w-full items-center justify-center py-4">
       <Suspense fallback={<LoadingSpinner label="Loading..." />}>
         <LoginContent />
       </Suspense>

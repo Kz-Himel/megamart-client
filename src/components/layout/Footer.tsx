@@ -18,6 +18,8 @@ const QUICK_LINKS = [
   { href: "/wishlist", label: "My Wishlist" },
   { href: "/cart", label: "Shopping Cart" },
   { href: "/orders", label: "Track Orders" },
+  { href: "/about", label: "About MegaMart" },
+  { href: "/contact", label: "Customer Support" },
 ];
 
 const TRUST_HIGHLIGHTS = [
@@ -156,6 +158,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/seller/apply"
+                  className="text-xs text-sky-400 font-semibold transition-colors hover:text-sky-300 sm:text-sm flex items-center gap-1"
+                >
+                  <span>Become a Seller &rarr;</span>
+                </Link>
+              </li>
             </ul>
 
             <div className="mt-6">

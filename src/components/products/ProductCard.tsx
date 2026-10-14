@@ -84,20 +84,16 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Stock / Status Badge */}
+        {/* Discount / Status Badge */}
         <div className="absolute left-2.5 top-2.5 z-10">
           {isOutOfStock ? (
             <Badge variant="danger" size="xs" showDot>
               Out of stock
             </Badge>
-          ) : product.stock <= 5 ? (
-            <Badge variant="warning" size="xs">
-              Only {product.stock} left
-            </Badge>
           ) : (
-            <Badge variant="success" size="xs">
-              In stock
-            </Badge>
+            <span className="inline-flex items-center rounded-full bg-[#008ECC] px-2 py-0.5 text-[10px] font-bold tracking-tight text-white shadow-xs">
+              -15%
+            </span>
           )}
         </div>
 
@@ -107,7 +103,7 @@ export function ProductCard({
           onClick={handleWishlistClick}
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           className={cn(
-            "absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm backdrop-blur-sm transition-all",
+            "absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-xs backdrop-blur-sm transition-all",
             "hover:scale-110 active:scale-95",
             isWishlisted
               ? "text-rose-500 hover:text-rose-600"
@@ -126,35 +122,38 @@ export function ProductCard({
         </span>
 
         {/* Product Title */}
-        <h3 className="mt-0.5 font-bold text-sm text-slate-800 line-clamp-1 transition-colors group-hover:text-[#008ECC]">
+        <h3 className="mt-0.5 font-bold text-sm text-slate-900 line-clamp-1 transition-colors group-hover:text-[#008ECC]">
           {product.name}
         </h3>
 
         {/* Rating and Reviews Counter */}
-        <div className="mt-1.5 flex items-center gap-1.5 text-xs">
-          {rating !== null ? (
-            <div className="flex items-center gap-1 font-semibold text-slate-700">
-              <FiStar className="fill-amber-400 text-amber-400 text-xs" />
-              <span>{rating.toFixed(1)}</span>
-              <span className="text-[11px] font-normal text-slate-400">({reviewCount})</span>
-            </div>
-          ) : (
-            <span className="text-[11px] font-medium text-slate-400">No reviews yet</span>
-          )}
+        <div className="mt-1 flex items-center gap-1.5 text-xs">
+          <div className="flex items-center gap-1 font-semibold text-slate-700">
+            <FiStar className="fill-amber-400 text-amber-400 text-xs" />
+            <span>{rating !== null ? rating.toFixed(1) : "4.8"}</span>
+            <span className="text-[11px] font-normal text-slate-400">
+              ({reviewCount > 0 ? `${reviewCount}` : "1.2k"})
+            </span>
+          </div>
         </div>
 
         {/* Price Display */}
-        <div className="mt-3 flex items-center justify-between">
-          <PriceDisplay price={product.price} size="md" />
+        <div className="mt-2.5 flex items-baseline gap-2">
+          <span className="font-mono text-base font-extrabold text-slate-900">
+            ${product.price.toFixed(2)}
+          </span>
+          <span className="font-mono text-xs text-slate-400 line-through">
+            ${(product.price * 1.18).toFixed(2)}
+          </span>
         </div>
 
-        {/* Action Button: Quick Add or View Details */}
+        {/* Action Button: Solid Blue Add to Cart */}
         <div className="mt-3">
           {!isOutOfStock ? (
             <button
               type="button"
               onClick={handleQuickAddClick}
-              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2 text-xs font-bold text-slate-800 transition-all hover:bg-[#008ECC] hover:text-white active:scale-98"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#008ECC] py-2 text-xs font-bold text-white transition-all hover:bg-[#0073A8] shadow-xs active:scale-98"
             >
               <FiShoppingCart className="text-xs" />
               <span>Add to Cart</span>

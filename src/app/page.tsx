@@ -9,6 +9,7 @@ import { CtaSection } from "@/components/home/CtaSection";
 import { PopularPicks } from "@/components/home/PopularPicks";
 import { ValueProposition } from "@/components/home/ValueProposition";
 import { PromoBanners } from "@/components/home/PromoBanners";
+import { DarkMarketingSection } from "@/components/home/DarkMarketingSection";
 
 export default function HomePage() {
   return (
@@ -24,15 +25,18 @@ export default function HomePage() {
       {/* Categories */}
       <CategoriesSection />
 
-      {/* Main Deals / Featured Products */}
+      {/* Main Deals / Best Selling Products */}
       <FeaturedProducts />
 
-      {/* 2. Promo Banners (High-converting offer banners) */}
+      {/* 2. Promo Banners (Big Deals & Trending Now) */}
       <PromoBanners />
 
       {/* Top Brands & Popular Picks */}
       <TopBrands />
       <PopularPicks />
+
+      {/* Dark Marketing Showcase ("More Than Just An Online Store") */}
+      <DarkMarketingSection />
 
       {/* Reviews & Call To Action */}
       <Testimonials />

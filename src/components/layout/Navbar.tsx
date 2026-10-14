@@ -146,122 +146,107 @@ export function Navbar() {
               )}
             </button>
 
-            {/* Logo with icon */}
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold tracking-tight text-[#008ECC]">
-                MegaMart
+            {/* Logo with 3D-styled shopping bag icon */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#008ECC] text-white shadow-xs transition-transform group-hover:scale-105">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zm-9-1a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+                </svg>
+              </div>
+              <span className="text-2xl font-black tracking-tight text-slate-900">
+                Mega<span className="text-[#008ECC]">Mart</span>
               </span>
             </Link>
           </div>
 
-          {/* Desktop Search Bar */}
+          {/* Desktop Search Bar (Pill shape with category selector as in reference image) */}
           <form
             onSubmit={handleSearchSubmit}
-            className="mx-2 hidden flex-1 max-w-xl items-center lg:flex xl:max-w-2xl"
+            className="mx-4 hidden flex-1 max-w-xl items-center lg:flex xl:max-w-2xl"
             role="search"
           >
-            <div className="flex w-full items-center overflow-hidden rounded-xl border border-gray-200 bg-[#F3F9FB] px-4 py-2 transition-all focus-within:border-[#008ECC] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#008ECC]/10">
-              <FiSearch className="text-lg text-[#008ECC]" aria-hidden="true" />
+            <div className="flex w-full items-center rounded-full border border-slate-200 bg-[#F3F9FB] px-4 py-2 transition-all focus-within:border-[#008ECC] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#008ECC]/10 shadow-xs">
+              <FiSearch className="text-lg text-slate-400 shrink-0" aria-hidden="true" />
               <input
                 type="search"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Search essentials, groceries and more..."
-                className="w-full bg-transparent px-3 text-sm text-gray-800 outline-none placeholder:text-gray-400"
+                placeholder="Search for products, brands and more..."
+                className="w-full bg-transparent px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400"
                 aria-label="Search products"
               />
-              <button
-                type="submit"
-                aria-label="Submit search"
-                className="flex shrink-0 items-center justify-center text-[#008ECC] hover:opacity-80"
-              >
-                <FiList className="text-xl" aria-hidden="true" />
-              </button>
+              <div className="flex items-center gap-1 border-l border-slate-200 pl-3 shrink-0">
+                <Link
+                  href="/categories"
+                  className="text-xs font-semibold text-slate-600 hover:text-[#008ECC] transition-colors whitespace-nowrap"
+                >
+                  All Categories ▾
+                </Link>
+              </div>
             </div>
           </form>
 
-          {/* Desktop Right Navigation */}
-          <div className="hidden shrink-0 items-center gap-5 lg:flex">
-            <Link
-              href="/products"
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
-            >
-              <FiBox className="text-lg text-[#008ECC]" />
-              <span>Products</span>
-            </Link>
-
-            <Link
-              href="/categories"
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
-            >
-              <FiTag className="text-lg text-[#008ECC]" />
-              <span>Categories</span>
-            </Link>
-
+          {/* Desktop Right Navigation (Wishlist, Cart, Profile) */}
+          <div className="hidden shrink-0 items-center gap-4 lg:flex">
             <Link
               href="/wishlist"
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-700 transition-colors hover:bg-sky-50 hover:text-[#008ECC] border border-slate-100"
+              title="Wishlist"
             >
-              <div className="relative flex items-center">
-                <FiHeart className="text-xl text-[#008ECC]" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
-                    {wishlistCount}
-                  </span>
-                )}
-              </div>
-              <span>Wishlist</span>
+              <FiHeart className="text-lg" />
+              {wishlistCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-xs">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
 
             <Link
               href="/cart"
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors hover:text-[#008ECC]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-700 transition-colors hover:bg-sky-50 hover:text-[#008ECC] border border-slate-100"
+              title="Cart"
             >
-              <div className="relative flex items-center">
-                <FiShoppingCart className="text-xl text-[#008ECC]" aria-hidden="true" />
-                {cartCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#008ECC] text-[10px] font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-              <span>Cart</span>
+              <FiShoppingCart className="text-lg" aria-hidden="true" />
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#008ECC] text-[10px] font-bold text-white shadow-xs">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
-            <span className="h-5 w-px bg-gray-200" aria-hidden="true" />
+            <span className="h-5 w-px bg-slate-200" aria-hidden="true" />
 
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Link
                   href={profileHref}
                   aria-label={profileLabel}
-                  className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-[#008ECC]"
+                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1 pr-3 shadow-xs hover:border-[#008ECC] transition-all"
                 >
-                  {isAdmin ? (
-                    <FiGrid className="text-lg text-[#008ECC]" />
-                  ) : (
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#008ECC] text-xs font-bold text-white">
-                      {initials(user?.name)}
-                    </span>
-                  )}
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#008ECC] text-xs font-bold text-white">
+                    {initials(user?.name)}
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 max-w-[100px] truncate">
+                    {user?.name?.split(" ")[0]}
+                  </span>
                 </Link>
 
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1 rounded-lg p-1.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
                   aria-label="Log out"
                   title="Log out"
                 >
-                  <FiLogOut className="text-lg" />
+                  <FiLogOut className="text-base" />
                 </button>
               </div>
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-[#008ECC]"
+                className="flex items-center gap-2 rounded-full bg-[#008ECC] px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#0073A8] transition-all"
               >
-                <FiUser className="text-lg text-[#008ECC]" aria-hidden="true" />
-                <span>Sign Up / Sign In</span>
+                <FiUser className="text-sm" aria-hidden="true" />
+                <span>Sign In</span>
               </Link>
             )}
           </div>
