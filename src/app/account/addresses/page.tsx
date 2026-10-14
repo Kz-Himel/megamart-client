@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FiMapPin, FiPlus, FiEdit2, FiTrash2, FiCheck, FiHome, FiBriefcase } from "react-icons/fi";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/Button";
@@ -36,7 +36,15 @@ const DEFAULT_ADDRESSES: Address[] = [
 
 export default function CustomerAddressesPage() {
   const { toast } = useToast();
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>(() => {
+    if (typeof window === "undefined") return DEFAULT_ADDRESSES;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : DEFAULT_ADDRESSES;
+    } catch {
+      return DEFAULT_ADDRESSES;
+    }
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -49,20 +57,6 @@ export default function CustomerAddressesPage() {
   const [formPostal, setFormPostal] = useState("");
   const [formCountry, setFormCountry] = useState("United States");
   const [formDefault, setFormDefault] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setAddresses(JSON.parse(stored));
-      } else {
-        setAddresses(DEFAULT_ADDRESSES);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_ADDRESSES));
-      }
-    } catch {
-      setAddresses(DEFAULT_ADDRESSES);
-    }
-  }, []);
 
   const saveToStorage = (updated: Address[]) => {
     setAddresses(updated);

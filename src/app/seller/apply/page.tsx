@@ -9,10 +9,7 @@ import {
   FiPhone,
   FiMapPin,
   FiFileText,
-  FiArrowRight,
-  FiCheckCircle,
   FiUploadCloud,
-  FiGlobe,
 } from "react-icons/fi";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useApplySeller } from "@/hooks/useSeller";
@@ -111,10 +108,10 @@ export default function SellerApplyPage() {
       });
 
       router.push("/seller/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Submission Failed",
-        description: err.message || "Could not submit seller application.",
+        description: err instanceof Error ? err.message : "Could not submit seller application.",
         variant: "error",
       });
     }

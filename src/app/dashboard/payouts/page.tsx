@@ -6,10 +6,7 @@ import {
   FiSearch,
   FiCheckCircle,
   FiXCircle,
-  FiClock,
   FiEye,
-  FiFileText,
-  FiExternalLink,
 } from "react-icons/fi";
 import { useAdminPayouts, useProcessPayout } from "@/hooks/useAdmin";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -67,10 +64,10 @@ export default function AdminPayoutsPage() {
       setSelectedPayout(null);
       setActionNotes("");
       refetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Processing Error",
-        description: err.message || "Failed to process payout.",
+        description: err instanceof Error ? err.message : "Failed to process payout.",
         variant: "error",
       });
     } finally {

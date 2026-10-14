@@ -20,8 +20,6 @@ import {
   FiMenu,
   FiX,
   FiBell,
-  FiCheckCircle,
-  FiAlertCircle,
   FiLogOut,
   FiExternalLink,
 } from "react-icons/fi";

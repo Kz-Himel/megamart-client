@@ -1,6 +1,3 @@
-"use client";
-
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 interface DashboardHeaderProps {

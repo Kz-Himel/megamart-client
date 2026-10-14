@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { FaGoogle, FaFacebookF, FaApple } from "react-icons/fa";
 
 interface SplitAuthCardProps {
@@ -19,7 +18,6 @@ export function SplitAuthCard({
   redirectParam,
   children,
 }: SplitAuthCardProps) {
-  const pathname = usePathname();
   const isLogin = mode === "login";
 
   const loginHref = redirectParam

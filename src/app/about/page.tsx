@@ -9,7 +9,6 @@ import {
   FiAward,
   FiCheckCircle,
   FiArrowRight,
-  FiHeart,
   FiShoppingBag,
 } from "react-icons/fi";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";

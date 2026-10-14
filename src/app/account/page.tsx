@@ -9,8 +9,6 @@ import {
   FiPackage,
   FiClock,
   FiMapPin,
-  FiCheckCircle,
-  FiUser,
   FiBriefcase,
 } from "react-icons/fi";
 import { useOrders } from "@/hooks/useOrders";

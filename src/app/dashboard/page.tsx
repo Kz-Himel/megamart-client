@@ -3,25 +3,14 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
-  FiBox,
-  FiTag,
   FiShoppingCart,
-  FiStar,
   FiUsers,
   FiDollarSign,
   FiBriefcase,
-  FiArrowUpRight,
-  FiCalendar,
-  FiTrendingUp,
-  FiCheckCircle,
   FiClock,
   FiArrowRight,
-  FiAlertCircle,
-  FiShield,
 } from "react-icons/fi";
 import {
-  AreaChart,
-  Area,
   PieChart,
   Pie,
   Cell,
@@ -32,12 +21,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import { useProducts } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
 import { useOrders } from "@/hooks/useOrders";
-import { useReviews } from "@/hooks/useReviews";
 import { useUsers } from "@/hooks/useUsers";
 import { useAdminSellers } from "@/hooks/useAdmin";
 import { useAdminPayouts } from "@/hooks/useAdmin";
@@ -47,7 +33,7 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
-import { OrderStatus } from "@/types/order.types";
+import { Order, OrderStatus } from "@/types/order.types";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -60,18 +46,14 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 
 export default function DashboardOverviewPage() {
   const { data: products, isLoading: loadingProducts } = useProducts();
-  const { data: categories, isLoading: loadingCategories } = useCategories();
   const { data: orders, isLoading: loadingOrders } = useOrders();
-  const { data: reviews, isLoading: loadingReviews } = useReviews();
   const { data: users, isLoading: loadingUsers } = useUsers();
   const { data: sellers, isLoading: loadingSellers } = useAdminSellers();
   const { data: payouts, isLoading: loadingPayouts } = useAdminPayouts();
 
   const isLoading =
     loadingProducts ||
-    loadingCategories ||
     loadingOrders ||
-    loadingReviews ||
     loadingUsers ||
     loadingSellers ||
     loadingPayouts;
@@ -255,7 +237,7 @@ export default function DashboardOverviewPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                <Tooltip formatter={(value: any) => [`$${value}`, "Sales"]} />
+                <Tooltip formatter={(value) => [`$${value ?? 0}`, "Sales"]} />
                 <Bar dataKey="sales" fill="#008ECC" radius={[6, 6, 0, 0]} maxBarSize={45} />
               </BarChart>
             </ResponsiveContainer>
@@ -281,7 +263,7 @@ export default function DashboardOverviewPage() {
                         <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#cbd5e1"} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: any, name: any) => [value, name]} />
+                    <Tooltip formatter={(value, name) => [value ?? 0, name ?? ""]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -329,7 +311,7 @@ export default function DashboardOverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {recentOrders.map((ord: any) => (
+                {recentOrders.map((ord: Order) => (
                   <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
                       #{ord.id.slice(0, 8)}

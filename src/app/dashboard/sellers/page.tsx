@@ -1,22 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import {
   FiBriefcase,
   FiSearch,
   FiCheckCircle,
   FiXCircle,
-  FiAlertCircle,
   FiEye,
   FiClock,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiFilter,
   FiShield,
   FiExternalLink,
-  FiDollarSign,
   FiFileText,
 } from "react-icons/fi";
 import { useAdminSellers, useUpdateSellerStatus, useUpdateSellerCommission } from "@/hooks/useAdmin";
@@ -108,10 +101,10 @@ export default function AdminSellersPage() {
         setSelectedStore((prev) => (prev ? { ...prev, status: targetStatus, adminFeedback: reason } : null));
       }
       refetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: "Update Failed",
-        description: err.message || "Could not update seller status.",
+        description: err instanceof Error ? err.message : "Could not update seller status.",
         variant: "error",
       });
     }
@@ -133,8 +126,8 @@ export default function AdminSellersPage() {
       setSelectedStore({ ...selectedStore, commissionRate: rate });
       setIsEditingCommission(false);
       toast({ title: "Commission Updated", description: `Commission set to ${(rate * 100).toFixed(0)}%.`, variant: "success" });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Could not update commission.", variant: "error" });
+    } catch (err: unknown) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Could not update commission.", variant: "error" });
     }
   };
 

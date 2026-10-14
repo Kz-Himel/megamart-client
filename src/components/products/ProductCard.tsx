@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { FiImage, FiStar, FiHeart, FiShoppingCart } from "react-icons/fi";
 import { Product } from "../../types/products.types";
-import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils/cn";
 import { useCart } from "@/lib/cart/CartContext";

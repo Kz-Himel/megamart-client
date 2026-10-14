@@ -8,7 +8,6 @@ import { Button } from "@heroui/react";
 import {
   FiX,
   FiSearch,
-  FiList,
   FiLogOut,
   FiShoppingCart,
   FiUser,

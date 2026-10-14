@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  FiSearch,
-  FiX,
   FiAlertCircle,
   FiPackage,
   FiSliders,
@@ -80,7 +78,7 @@ function ProductsContent() {
     sort,
   });
 
-  const { data: categories, isLoading: isCategoriesLoading } = useCategories();
+  const { data: categories } = useCategories();
   const activeCategories = (categories ?? []).filter((c) => c.status === "ACTIVE");
 
   const activeCategory = activeCategories.find((c) => c.id === categoryId);

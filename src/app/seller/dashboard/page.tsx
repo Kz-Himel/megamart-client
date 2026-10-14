@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -13,14 +13,11 @@ import {
   FiPlus,
   FiClock,
   FiCheckCircle,
-  FiAlertCircle,
   FiTruck,
   FiXCircle,
   FiSearch,
-  FiFilter,
   FiEdit2,
   FiTrash2,
-  FiExternalLink,
   FiShield,
   FiArrowRight,
   FiUploadCloud,
@@ -47,10 +44,8 @@ import {
   useUpdateSellerOrderStatus,
   useRequestPayout,
   useUpdateSellerProfile,
-  useApplySeller,
 } from "@/hooks/useSeller";
 import { useCategories } from "@/hooks/useCategories";
-import { useAuth } from "@/lib/auth/useAuth";
 import { uploadApi } from "@/lib/api/upload.api";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardMetricCard } from "@/components/dashboard/DashboardMetricCard";
@@ -60,21 +55,173 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
-import { OrderStatus } from "@/types/order.types";
+import { OrderStatus, Order } from "@/types/order.types";
+import { Product } from "@/types/products.types";
+import { Store } from "@/types/seller.types";
+
+function StoreSettingsTab({
+  store,
+  onSave,
+  isSaving,
+}: {
+  store: Store;
+  onSave: (data: {
+    name: string;
+    description: string;
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+    country: string;
+  }) => Promise<void>;
+  isSaving: boolean;
+}) {
+  const [name, setName] = useState(store.name || "");
+  const [desc, setDesc] = useState(store.description || "");
+  const [phone, setPhone] = useState(store.phone || "");
+  const [email, setEmail] = useState(store.email || "");
+  const [address, setAddress] = useState(store.address || "");
+  const [city, setCity] = useState(store.city || "");
+  const [country, setCountry] = useState(store.country || "United States");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSave({
+      name: name.trim(),
+      description: desc.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      country: country.trim(),
+    });
+  };
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <div className="border-b border-slate-100 pb-3">
+        <h3 className="text-sm font-bold text-slate-900">Store Profile & Branding</h3>
+        <p className="text-xs text-slate-500">Configure your storefront details visible to shoppers.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="text-xs font-bold text-slate-700 block mb-1">Store Name *</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-bold text-slate-700 block mb-1">Store Slug / Handle (Permanent)</label>
+          <input
+            type="text"
+            disabled
+            value={`@${store.slug}`}
+            className="w-full rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs text-slate-500 font-mono"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-bold text-slate-700 block mb-1">Store Description *</label>
+          <textarea
+            required
+            rows={3}
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Business Phone *</label>
+            <input
+              type="text"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Support Email *</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-bold text-slate-700 block mb-1">Business Address *</label>
+          <input
+            type="text"
+            required
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">City *</label>
+            <input
+              type="text"
+              required
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Country *</label>
+            <input
+              type="text"
+              required
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
+            />
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            isLoading={isSaving}
+            className="rounded-xl font-bold bg-[#008ECC] text-white"
+          >
+            Save Store Settings
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 export default function SellerDashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
-  const { user } = useAuth();
   const { toast } = useToast();
 
   // Seller Data Queries
   const { data: store, isLoading: storeLoading, refetch: refetchStore } = useMyStore();
-  const { data: analytics, isLoading: analyticsLoading } = useSellerAnalytics();
-  const { data: products, isLoading: productsLoading } = useSellerProducts();
-  const { data: orders, isLoading: ordersLoading } = useSellerOrders();
-  const { data: payouts, isLoading: payoutsLoading } = useSellerPayouts();
+  const { data: analytics } = useSellerAnalytics();
+  const { data: products } = useSellerProducts();
+  const { data: orders } = useSellerOrders();
+  const { data: payouts } = useSellerPayouts();
   const { data: categories } = useCategories();
 
   // Mutations
@@ -84,7 +231,6 @@ export default function SellerDashboardPage() {
   const updateOrderStatus = useUpdateSellerOrderStatus();
   const requestPayout = useRequestPayout();
   const updateProfile = useUpdateSellerProfile();
-  const applySeller = useApplySeller();
 
   // Modals state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -110,27 +256,25 @@ export default function SellerDashboardPage() {
   const [payoutAccount, setPayoutAccount] = useState("");
   const [payoutNotes, setPayoutNotes] = useState("");
 
-  // Store Profile Form State
-  const [storeName, setStoreName] = useState("");
-  const [storeDesc, setStoreDesc] = useState("");
-  const [storePhone, setStorePhone] = useState("");
-  const [storeEmail, setStoreEmail] = useState("");
-  const [storeAddress, setStoreAddress] = useState("");
-  const [storeCity, setStoreCity] = useState("");
-  const [storeCountry, setStoreCountry] = useState("");
+  // Filtered Products Memo (declared at top before any returns)
+  const filteredProducts = useMemo(() => {
+    return (products ?? []).filter((p) => {
+      const matchSearch = p.name.toLowerCase().includes(productSearch.toLowerCase());
+      const matchCat = categoryFilter === "ALL" || p.categoryId === categoryFilter;
+      return matchSearch && matchCat;
+    });
+  }, [products, productSearch, categoryFilter]);
 
-  // Populate store profile fields once loaded
-  useEffect(() => {
-    if (store) {
-      setStoreName(store.name || "");
-      setStoreDesc(store.description || "");
-      setStorePhone(store.phone || "");
-      setStoreEmail(store.email || "");
-      setStoreAddress(store.address || "");
-      setStoreCity(store.city || "");
-      setStoreCountry(store.country || "");
-    }
-  }, [store]);
+  // Sales trend data from real metrics (declared at top before any returns)
+  const chartData = useMemo(() => {
+    const rawSales = analytics?.metrics?.grossSales ?? 0;
+    return [
+      { name: "Week 1", sales: Math.round(rawSales * 0.15) },
+      { name: "Week 2", sales: Math.round(rawSales * 0.25) },
+      { name: "Week 3", sales: Math.round(rawSales * 0.28) },
+      { name: "Week 4", sales: Math.round(rawSales * 0.32) },
+    ];
+  }, [analytics]);
 
   const setTab = (tab: string) => {
     router.push(`/seller/dashboard?tab=${tab}`);
@@ -407,7 +551,7 @@ export default function SellerDashboardPage() {
     setIsProductModalOpen(true);
   };
 
-  const handleOpenEditProduct = (p: any) => {
+  const handleOpenEditProduct = (p: Product) => {
     setEditingProductId(p.id);
     setProdName(p.name);
     setProdDesc(p.description);
@@ -466,8 +610,9 @@ export default function SellerDashboardPage() {
         toast({ title: "Product Created", description: "Listing is now live in store.", variant: "success" });
       }
       setIsProductModalOpen(false);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to save product.", variant: "error" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save product.";
+      toast({ title: "Error", description: msg, variant: "error" });
     }
   };
 
@@ -490,8 +635,9 @@ export default function SellerDashboardPage() {
         description: `Order marked as ${nextStatus}.${nextStatus === "DELIVERED" ? " Earnings credited to your available balance!" : ""}`,
         variant: "success",
       });
-    } catch (err: any) {
-      toast({ title: "Fulfillment Error", description: err.message || "Could not update order status.", variant: "error" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not update order status.";
+      toast({ title: "Fulfillment Error", description: msg, variant: "error" });
     }
   };
 
@@ -528,49 +674,29 @@ export default function SellerDashboardPage() {
       setPayoutAmount("");
       setPayoutAccount("");
       setPayoutNotes("");
-    } catch (err: any) {
-      toast({ title: "Payout Failed", description: err.message || "Failed to submit payout request.", variant: "error" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to submit payout request.";
+      toast({ title: "Payout Failed", description: msg, variant: "error" });
     }
   };
 
-  // Handlers for Store Profile Update
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveProfile = async (data: {
+    name: string;
+    description: string;
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+    country: string;
+  }) => {
     try {
-      await updateProfile.mutateAsync({
-        name: storeName.trim(),
-        description: storeDesc.trim(),
-        phone: storePhone.trim(),
-        email: storeEmail.trim(),
-        address: storeAddress.trim(),
-        city: storeCity.trim(),
-        country: storeCountry.trim(),
-      });
+      await updateProfile.mutateAsync(data);
       toast({ title: "Store Profile Saved", description: "Your store settings have been updated.", variant: "success" });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to update profile.", variant: "error" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update profile.";
+      toast({ title: "Error", description: msg, variant: "error" });
     }
   };
-
-  // Filtered Products
-  const filteredProducts = useMemo(() => {
-    return (products ?? []).filter((p) => {
-      const matchSearch = p.name.toLowerCase().includes(productSearch.toLowerCase());
-      const matchCat = categoryFilter === "ALL" || p.categoryId === categoryFilter;
-      return matchSearch && matchCat;
-    });
-  }, [products, productSearch, categoryFilter]);
-
-  // Sales trend data from real metrics
-  const chartData = useMemo(() => {
-    const rawSales = analytics?.metrics?.grossSales ?? 0;
-    return [
-      { name: "Week 1", sales: Math.round(rawSales * 0.15) },
-      { name: "Week 2", sales: Math.round(rawSales * 0.25) },
-      { name: "Week 3", sales: Math.round(rawSales * 0.28) },
-      { name: "Week 4", sales: Math.round(rawSales * 0.32) },
-    ];
-  }, [analytics]);
 
   return (
     <div className="space-y-6">
@@ -696,7 +822,7 @@ export default function SellerDashboardPage() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
                     <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip formatter={(value: any) => [`$${value}`, "Sales"]} />
+                    <Tooltip formatter={(value) => [`$${value ?? 0}`, "Sales"]} />
                     <Area type="monotone" dataKey="sales" stroke="#008ECC" strokeWidth={2.5} fillOpacity={1} fill="url(#colorSales)" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -899,7 +1025,7 @@ export default function SellerDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {orders?.map((ord: any) => (
+                  {orders?.map((ord: Order) => (
                     <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-slate-900">
                         #{ord.id.slice(0, 8)}
@@ -917,13 +1043,12 @@ export default function SellerDashboardPage() {
                         {formatCurrency(ord.totalPrice)}
                       </td>
                       <td className="py-3 px-4 font-bold text-emerald-700 whitespace-nowrap">
-                        {formatCurrency(ord.sellerEarnings || ord.totalPrice * 0.9)}
+                        {formatCurrency(ord.totalPrice * 0.9)}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <StatusBadge status={ord.status} size="sm" />
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
-                        {/* Fulfillment Action Pipeline */}
                         {ord.status === "PENDING" && (
                           <Button
                             type="button"
@@ -1065,114 +1190,7 @@ export default function SellerDashboardPage() {
       {/* TAB 5: STORE SETTINGS */}
       {/* ========================================================================= */}
       {activeTab === "settings" && (
-        <div className="max-w-2xl space-y-6">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-900">Store Profile & Branding</h3>
-            <p className="text-xs text-slate-500">Configure your storefront name, description, and contact information visible to shoppers.</p>
-          </div>
-
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Store Name *</label>
-              <input
-                type="text"
-                required
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Store Slug / Handle (Permanent)</label>
-              <input
-                type="text"
-                disabled
-                value={`@${store.slug}`}
-                className="w-full rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs text-slate-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Store Description *</label>
-              <textarea
-                required
-                rows={3}
-                value={storeDesc}
-                onChange={(e) => setStoreDesc(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Business Phone *</label>
-                <input
-                  type="text"
-                  required
-                  value={storePhone}
-                  onChange={(e) => setStorePhone(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Support Email *</label>
-                <input
-                  type="email"
-                  required
-                  value={storeEmail}
-                  onChange={(e) => setStoreEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Business Address *</label>
-              <input
-                type="text"
-                required
-                value={storeAddress}
-                onChange={(e) => setStoreAddress(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">City *</label>
-                <input
-                  type="text"
-                  required
-                  value={storeCity}
-                  onChange={(e) => setStoreCity(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Country *</label>
-                <input
-                  type="text"
-                  required
-                  value={storeCountry}
-                  onChange={(e) => setStoreCountry(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs text-slate-900 focus:border-[#008ECC] focus:ring-1 focus:ring-[#008ECC] focus:outline-hidden"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                className="rounded-xl font-bold bg-[#008ECC] text-white"
-              >
-                Save Store Settings
-              </Button>
-            </div>
-          </form>
-        </div>
+        <StoreSettingsTab store={store} onSave={handleSaveProfile} isSaving={updateProfile.isPending} />
       )}
 
       {/* ========================================================================= */}
@@ -1293,6 +1311,7 @@ export default function SellerDashboardPage() {
                   type="submit"
                   variant="primary"
                   size="sm"
+                  isLoading={createProduct.isPending || updateProduct.isPending}
                   className="rounded-xl font-bold bg-[#008ECC] text-white"
                 >
                   {editingProductId ? "Save Changes" : "Create Listing"}
@@ -1391,6 +1410,7 @@ export default function SellerDashboardPage() {
                   type="submit"
                   variant="primary"
                   size="sm"
+                  isLoading={requestPayout.isPending}
                   className="rounded-xl font-bold bg-[#008ECC] text-white"
                 >
                   Submit Payout Request

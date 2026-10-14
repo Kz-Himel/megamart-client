@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiAlertTriangle, FiCheckCircle, FiXCircle, FiClock, FiShield } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle, FiClock, FiShield } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 
 export type DecisionType = "APPROVE" | "REJECT" | "CHANGES_REQUESTED" | "SUSPEND";
