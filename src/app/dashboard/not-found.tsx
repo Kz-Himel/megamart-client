@@ -9,7 +9,7 @@ export default function DashboardNotFound() {
       <h2 className="font-display text-xl font-medium">Not found</h2>
       <p className="text-sm text-muted">This record doesn&apos;t exist or was deleted.</p>
       <Link href="/dashboard">
-        <Button size="sm" variant="ghost">Back to dashboard</Button>
+        <Button size="sm" variant="ghost">Back to Home</Button>
       </Link>
     </div>
   );
